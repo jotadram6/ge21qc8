@@ -8,6 +8,7 @@ import sys
 import os
 import datetime
 print datetime.datetime.now()
+import socket
 import FWCore.ParameterSet.Config as cms
 import configureRun_cfi as runConfig
 
@@ -101,19 +102,39 @@ for i in xrange(len(SuperChType)):
 # Config importation & settings
 process.maxEvents = cms.untracked.PSet(input = cms.untracked.int32(options.eventsPerJob))
 
-fpath =  "/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run{:06d}/".format(int(run_number))
+# Data input folder and file type
 
-for x in os.listdir(fpath):
-    if x.endswith("ls0001_allindex.raw"):
-        dataFileExtension = ".raw"
-        uFEDKit = True
-        break
-    elif x.endswith("chunk_000000.dat"):
-        dataFileExtension = ".dat"
-        uFEDKit = False
-        break
-    else:
-        print "Check the data files... First file (at least) is missing!"
+if (socket.gethostname()=="gem904qc8dqm"):
+
+    fpath =  "/data/bigdisk/GEM-Data-Taking/GE11_QC8/Cosmics/run{:06d}/".format(int(run_number))
+
+    for x in os.listdir(fpath):
+        if x.endswith("ls0001_index000000.raw"):
+            dataFileExtension = ".raw"
+            uFEDKit = True
+            break
+        elif x.endswith("chunk_000000.dat"):
+            dataFileExtension = ".dat"
+            uFEDKit = False
+            break
+        else:
+            print "Check the data files... First file (at least) is missing!"
+
+else:
+
+    fpath =  "/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run{:06d}/".format(int(run_number))
+
+    for x in os.listdir(fpath):
+        if x.endswith("ls0001_allindex.raw"):
+            dataFileExtension = ".raw"
+            uFEDKit = True
+            break
+        elif x.endswith("chunk_000000.dat"):
+            dataFileExtension = ".dat"
+            uFEDKit = False
+            break
+        else:
+            print "Check the data files... First file (at least) is missing!"
 
 # Input source
 process.source = cms.Source("GEMLocalModeDataSource",
