@@ -5,6 +5,7 @@ import io
 import subprocess
 import time
 import datetime
+import socket
 
 if __name__ == '__main__':
 
@@ -30,18 +31,37 @@ if __name__ == '__main__':
     import geometry_files_creator
 
     # Retrieve start date and time of the run
-    fpath =  "/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run{:06d}/".format(int(args.run_number))
-    for x in os.listdir(fpath):
-        if x.endswith("ls0001_allindex.raw"):
-            file0name = x
-            break
-        elif x.endswith("chunk_000000.dat"):
-            file0name = x
-            break
-        else:
-            print "Check the data files... First file (at least) is missing!"
-    startDateTime = file0name.split('_')[3] + "_" + file0name.split('_')[4]
-    time.sleep(1)
+
+    if (socket.gethostname()=="gem904qc8dqm"):
+
+          fpath =  "/data/bigdisk/GEM-Data-Taking/GE11_QC8/Cosmics/run{:06d}/".format(int(args.run_number))
+          for x in os.listdir(fpath):
+              if x.endswith("ls0001_index000000.raw"):
+                  file0name = x
+                  break
+              elif x.endswith("chunk_000000.dat"):
+                  file0name = x
+                  break
+              else:
+                  print "Check the data files... First file (at least) is missing!"
+          t = datetime.datetime.fromtimestamp(os.path.getmtime(fpath+file0name))
+          startDateTime = str("{:04d}".format(int(t.year))) + "-" + str("{:02d}".format(int(t.month))) + "-" + str("{:02d}".format(int(t.day))) + "_" + str("{:02d}".format(int(t.hour))) + "-" + str("{:02d}".format(int(t.minute))) + "-" + str("{:02d}".format(int(t.second)))
+          time.sleep(1)
+
+    else:
+
+        fpath =  "/eos/cms/store/group/dpg_gem/comm_gem/QC8_Commissioning/run{:06d}/".format(int(args.run_number))
+        for x in os.listdir(fpath):
+            if x.endswith("ls0001_allindex.raw"):
+                file0name = x
+                break
+            elif x.endswith("chunk_000000.dat"):
+                file0name = x
+                break
+            else:
+                print "Check the data files... First file (at least) is missing!"
+        startDateTime = file0name.split('_')[3] + "_" + file0name.split('_')[4]
+        time.sleep(1)
 
     # Get stand configuration table from the DB
     if int(args.run_number) > 237:
