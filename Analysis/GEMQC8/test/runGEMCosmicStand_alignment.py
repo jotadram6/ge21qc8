@@ -134,7 +134,7 @@ if (socket.gethostname()=="gem904qc8dqm"):
             dataFileExtension = ".dat"
             uFEDKit = False
             break
-    if (not dataFileExtension.endswith(".raw") and not dataFileExtension.endswith(".dat"):
+    if (not dataFileExtension.endswith(".raw") and not dataFileExtension.endswith(".dat")):
         print "Check the data files... First file (at least) is missing!"
 
 else:
@@ -150,7 +150,7 @@ else:
             dataFileExtension = ".dat"
             uFEDKit = False
             break
-    if (not dataFileExtension.endswith(".raw") and not dataFileExtension.endswith(".dat"):
+    if (not dataFileExtension.endswith(".raw") and not dataFileExtension.endswith(".dat")):
         print "Check the data files... First file (at least) is missing!"
 
 # Input source

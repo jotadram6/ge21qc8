@@ -46,7 +46,7 @@ if __name__ == '__main__':
               elif x.endswith("chunk_000000.dat"):
                   file0name = x
                   break
-          if (not file0name.endswith("ls0001_index000000.raw") and not file0name.endswith("chunk_000000.dat"):
+          if (not file0name.endswith("ls0001_index000000.raw") and not file0name.endswith("chunk_000000.dat")):
               print "Check the data files... First file (at least) is missing!"
           t = datetime.datetime.fromtimestamp(os.path.getmtime(fpath+file0name))
           startDateTime = str("{:04d}".format(int(t.year))) + "-" + str("{:02d}".format(int(t.month))) + "-" + str("{:02d}".format(int(t.day))) + "_" + str("{:02d}".format(int(t.hour))) + "-" + str("{:02d}".format(int(t.minute))) + "-" + str("{:02d}".format(int(t.second)))
@@ -62,7 +62,7 @@ if __name__ == '__main__':
             elif x.endswith("chunk_000000.dat"):
                 file0name = x
                 break
-        if (not file0name.endswith("ls0001_index000000.raw") and not file0name.endswith("chunk_000000.dat"):
+        if (not file0name.endswith("ls0001_index000000.raw") and not file0name.endswith("chunk_000000.dat")):
             print "Check the data files... First file (at least) is missing!"
         startDateTime = file0name.split('_')[3] + "_" + file0name.split('_')[4]
         time.sleep(1)
