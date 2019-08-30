@@ -117,8 +117,8 @@ if (socket.gethostname()=="gem904qc8dqm"):
             dataFileExtension = ".dat"
             uFEDKit = False
             break
-        else:
-            print "Check the data files... First file (at least) is missing!"
+    if (!dataFileExtension.endswith(".raw") && !dataFileExtension.endswith(".dat"):
+        print "Check the data files... First file (at least) is missing!"
 
 else:
 
@@ -133,8 +133,8 @@ else:
             dataFileExtension = ".dat"
             uFEDKit = False
             break
-        else:
-            print "Check the data files... First file (at least) is missing!"
+    if (!dataFileExtension.endswith(".raw") && !dataFileExtension.endswith(".dat"):
+        print "Check the data files... First file (at least) is missing!"
 
 # Input source
 process.source = cms.Source("GEMLocalModeDataSource",
