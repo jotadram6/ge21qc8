@@ -54,7 +54,7 @@ if __name__ == '__main__':
 
   # Define the parser
   import argparse
-  parser = argparse.ArgumentParser(description="QC8 data analysis step 4. Software alignment of the chambers in the stand. For any doubt: https://twiki.cern.ch/twiki/bin/view/CMS/GEMCosmicRayAnalysis")
+  parser = argparse.ArgumentParser(description="QC8 data analysis step 5. Software alignment of the chambers in the stand. For any doubt: https://twiki.cern.ch/twiki/bin/view/CMS/GEMCosmicRayAnalysis")
   # Positional arguments
   parser.add_argument("run_number", type=int, help="Specify the run number")
   args = parser.parse_args()
@@ -108,7 +108,7 @@ if __name__ == '__main__':
       time.sleep(1)
 
   # Get stand configuration table from the DB
-  if int(args.run_number) > 237:
+  if (int(args.run_number) > 237 and int(args.run_number) < 266) or (int(args.run_number) > 272):
       dumpDBtables.getConfigurationTable(args.run_number,startDateTime)
 
   # Generate configuration file

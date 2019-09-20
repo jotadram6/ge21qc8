@@ -65,7 +65,7 @@ if __name__ == '__main__':
         time.sleep(1)
 
     # Get stand configuration table from the DB
-    if int(args.run_number) > 237:
+    if (int(args.run_number) > 237 and int(args.run_number) < 266) or (int(args.run_number) > 272):
         dumpDBtables.getConfigurationTable(args.run_number,startDateTime)
 
     # Generate configuration file
