@@ -155,7 +155,7 @@ else:
 
 # Input source
 process.source = cms.Source("GEMLocalModeDataSource",
-                            fileNames = cms.untracked.vstring ([fpath+x for x in os.listdir(fpath) if x.endswith(dataFileExtension)]),
+                            fileNames = cms.untracked.vstring ([fpath+x for x in sorted(os.listdir(fpath)) if x.endswith(dataFileExtension)]),
                             skipEvents=cms.untracked.uint32(0),
                             fedId = cms.untracked.int32(888),  # which fedID to assign
                             hasFerolHeader = cms.untracked.bool(uFEDKit),
