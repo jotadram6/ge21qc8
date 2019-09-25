@@ -198,7 +198,7 @@ process.gemRecHits = cms.EDProducer("GEMRecHitProducer",
                                     gemDigiLabel = cms.InputTag("muonGEMDigis"),
                                     maskFile = cms.FileInPath(hotStripsFile),
                                     deadFile = cms.FileInPath(deadStripsFile),
-                                    applyMasking = cms.bool(False)
+                                    applyMasking = cms.bool(True)
                                     )
 
 # Get certified events from file
