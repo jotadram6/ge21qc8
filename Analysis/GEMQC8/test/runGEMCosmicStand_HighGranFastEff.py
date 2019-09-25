@@ -8,6 +8,7 @@ import sys
 import os
 import datetime
 print datetime.datetime.now()
+import socket
 import FWCore.ParameterSet.Config as cms
 import configureRun_cfi as runConfig
 
