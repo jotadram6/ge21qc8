@@ -238,6 +238,66 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		}
 	}
 
+	// Getting High Granularity Numerator per layer histrogram
+
+	TH3D *numPerLayer = (TH3D*)infile->Get("ValidationQC8/num2DPerLayer");
+
+	// High Granularity Numerator plots per layer
+
+	TH2D *HGNum2D[10];
+	for (int row=0; row<5; row++)
+	{
+		namename = "numerator_high_granularity_row_" + to_string(row+1) + "_B";
+		HGNum2D[row*2] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+		namename = "numerator_high_granularity_row_" + to_string(row+1) + "_T";
+		HGNum2D[(row*2)+1] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+	}
+
+	for (int layer=0; layer<10; layer++)
+	{
+		for (int eta=1; eta<=8; eta++)
+		{
+			for (int phi=1; phi<=200; phi++)
+			{
+				HGNum2D[layer]->SetBinContent(phi,eta,numPerLayer->GetBinContent(phi,eta,layer+1));
+			}
+		}
+	}
+
+	// Getting High Granularity Denominator per layer histrogram
+
+	TH3D *denomPerLayer = (TH3D*)infile->Get("ValidationQC8/denom2DPerLayer");
+
+	// High Granularity Denominator plots per layer
+
+	TH2D *HGDenom2D[10];
+	for (int row=0; row<5; row++)
+	{
+		namename = "denominator_high_granularity_row_" + to_string(row+1) + "_B";
+		HGDenom2D[row*2] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+		namename = "denominator_high_granularity_row_" + to_string(row+1) + "_T";
+		HGDenom2D[(row*2)+1] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+	}
+
+	for (int layer=0; layer<10; layer++)
+	{
+		for (int eta=1; eta<=8; eta++)
+		{
+			for (int phi=1; phi<=200; phi++)
+			{
+				HGDenom2D[layer]->SetBinContent(phi,eta,denomPerLayer->GetBinContent(phi,eta,layer+1));
+			}
+		}
+	}
+
+	// High Granularity Efficiency per layer histogram
+
+	TH2D *HGEff2D[10];
+	for (int row=0; row<10; row++)
+	{
+		HGEff2D->Divide(HGNum2D[row],HGDenom2D[row]);
+	}
+
 	// Getting clusterSize 3D histogram
 
 	TH3D *clusterSize3D = (TH3D*)infile->Get("ValidationQC8/clusterSize");
@@ -809,6 +869,108 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		col_1_2->Draw("SAME");
 		col_2_3->Draw("SAME");
 		namename = "Efficiency_Row_" + to_string(row+1) + "_T.png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
+	}
+
+	// Plots of High Granlarity Numerator per layer
+
+	for (int row=0; row<5; row++)
+	{
+		namename = "Numerator_High_Granularity_Row_" + to_string(row+1) + "_B" + "_run_" + to_string(run);
+		HGNum2D[row*2]->SetTitle(namename.c_str());
+		HGNum2D[row*2]->SetStats(0);
+		HGNum2D[row*2]->GetXaxis()->SetTitle("x [cm]");
+		HGNum2D[row*2]->GetYaxis()->SetTitle("#eta partition");
+		for (int y = 0; y < 8; y++)
+		{
+			HGNum2D[row*2]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
+		}
+		HGNum2D[row*2]->Draw("colz");
+		HGNum2D[row*2]->Write(namename.c_str());
+		namename = "Numerator_High_Granularity_Row_" + to_string(row+1) + "_B.png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
+		namename = "Numerator_High_Granularity_Row_" + to_string(row+1) + "_T" + "_run_" + to_string(run);
+		HGNum2D[(row*2)+1]->SetTitle(namename.c_str());
+		HGNum2D[(row*2)+1]->SetStats(0);
+		HGNum2D[(row*2)+1]->GetXaxis()->SetTitle("x [cm]");
+		HGNum2D[(row*2)+1]->GetYaxis()->SetTitle("#eta partition");
+		for (int y = 0; y < 8; y++)
+		{
+			HGNum2D[row*2+1]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
+		}
+		HGNum2D[(row*2)+1]->Draw("colz");
+		HGNum2D[(row*2)+1]->Write(namename.c_str());
+		namename = "Numerator_High_Granularity_Row_" + to_string(row+1) + "_T.png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
+	}
+
+	// Plots of High Granlarity Denominator per layer
+
+	for (int row=0; row<5; row++)
+	{
+		namename = "Denominator_High_Granularity_Row_" + to_string(row+1) + "_B" + "_run_" + to_string(run);
+		HGDenom2D[row*2]->SetTitle(namename.c_str());
+		HGDenom2D[row*2]->SetStats(0);
+		HGDenom2D[row*2]->GetXaxis()->SetTitle("x [cm]");
+		HGDenom2D[row*2]->GetYaxis()->SetTitle("#eta partition");
+		for (int y = 0; y < 8; y++)
+		{
+			HGDenom2D[row*2]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
+		}
+		HGDenom2D[row*2]->Draw("colz");
+		HGDenom2D[row*2]->Write(namename.c_str());
+		namename = "Denominator_High_Granularity_Row_" + to_string(row+1) + "_B.png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
+		namename = "Denominator_High_Granularity_Row_" + to_string(row+1) + "_T" + "_run_" + to_string(run);
+		HGDenom2D[(row*2)+1]->SetTitle(namename.c_str());
+		HGDenom2D[(row*2)+1]->SetStats(0);
+		HGDenom2D[(row*2)+1]->GetXaxis()->SetTitle("x [cm]");
+		HGDenom2D[(row*2)+1]->GetYaxis()->SetTitle("#eta partition");
+		for (int y = 0; y < 8; y++)
+		{
+			HGDenom2D[row*2+1]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
+		}
+		HGDenom2D[(row*2)+1]->Draw("colz");
+		HGDenom2D[(row*2)+1]->Write(namename.c_str());
+		namename = "Denominator_High_Granularity_Row_" + to_string(row+1) + "_T.png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
+	}
+
+	// Plots of High Granlarity Efficiency per layer
+
+	for (int row=0; row<5; row++)
+	{
+		namename = "Efficiency_High_Granularity_Row_" + to_string(row+1) + "_B" + "_run_" + to_string(run);
+		HGEff2D[row*2]->SetTitle(namename.c_str());
+		HGEff2D[row*2]->SetStats(0);
+		HGEff2D[row*2]->GetXaxis()->SetTitle("x [cm]");
+		HGEff2D[row*2]->GetYaxis()->SetTitle("#eta partition");
+		for (int y = 0; y < 8; y++)
+		{
+			HGEff2D[row*2]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
+		}
+		HGEff2D[row*2]->Draw("colz");
+		HGEff2D[row*2]->Write(namename.c_str());
+		namename = "Efficiency_High_Granularity_Row_" + to_string(row+1) + "_B.png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
+		namename = "Efficiency_High_Granularity_Row_" + to_string(row+1) + "_T" + "_run_" + to_string(run);
+		HGEff2D[(row*2)+1]->SetTitle(namename.c_str());
+		HGEff2D[(row*2)+1]->SetStats(0);
+		HGEff2D[(row*2)+1]->GetXaxis()->SetTitle("x [cm]");
+		HGEff2D[(row*2)+1]->GetYaxis()->SetTitle("#eta partition");
+		for (int y = 0; y < 8; y++)
+		{
+			HGEff2D[row*2+1]->GetYaxis()->SetBinLabel(y+1, to_string(y+1).c_str());
+		}
+		HGEff2D[(row*2)+1]->Draw("colz");
+		HGEff2D[(row*2)+1]->Write(namename.c_str());
+		namename = "Efficiency_High_Granularity_Row_" + to_string(row+1) + "_T.png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
 	}

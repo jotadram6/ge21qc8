@@ -93,6 +93,8 @@ private:
   TH3D *recHits2DPerLayer;
   TH3D *associatedHits2DPerLayer;
   TH3D *nonAssociatedHits2DPerLayer;
+  TH3D *num2DPerLayer;
+  TH3D *denom2DPerLayer;
   TH1D *recHitsPerEvt;
   TH2D *nonAssRecHitsPerEvt;
   TH3D *clusterSize;
