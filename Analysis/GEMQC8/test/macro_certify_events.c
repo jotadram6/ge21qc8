@@ -56,11 +56,11 @@ void macro_certify_events(int run, string configDir)
 	for (unsigned int ch=0; ch<30; ch++)
 	{
 		sprintf(name,"NdigisVsEvent_ch_%u",ch);
-		NdigisPerChVsEvt[ch] = new TH1D(name,"",12000,0,12000000);
+		NdigisPerChVsEvt[ch] = new TH1D(name,"",24000,0,24000000);
 		sprintf(name,"NdigisDistribution_ch_%u",ch);
-		NdigisPerChDistribution[ch] = new TH1D(name,"",10000,1,100001);
+		NdigisPerChDistribution[ch] = new TH1D(name,"",1000,1,10001);
 
-		for (int evt=0; evt<12000; evt++)
+		for (int evt=0; evt<24000; evt++)
 		{
 			NdigisPerChVsEvt[ch]->SetBinContent((evt+1),digisVsEvt->GetBinContent(evt+1,ch+1));
 			NdigisPerChDistribution[ch]->Fill(digisVsEvt->GetBinContent(evt+1,ch+1));
@@ -77,11 +77,11 @@ void macro_certify_events(int run, string configDir)
 	for (unsigned int ch=0; ch<30; ch++)
 	{
 		sprintf(name,"NrecHitsVsEvent_ch_%u",ch);
-		NrecHitsPerChVsEvt[ch] = new TH1D(name,"",12000,0,12000000);
+		NrecHitsPerChVsEvt[ch] = new TH1D(name,"",24000,0,24000000);
 		sprintf(name,"NrecHitsDistribution_ch_%u",ch);
-		NrecHitsPerChDistribution[ch] = new TH1D(name,"",10000,1,100001);
+		NrecHitsPerChDistribution[ch] = new TH1D(name,"",1000,1,10001);
 
-		for (int evt=0; evt<12000; evt++)
+		for (int evt=0; evt<24000; evt++)
 		{
 			NrecHitsPerChVsEvt[ch]->SetBinContent((evt+1),recHitsVsEvt->GetBinContent(evt+1,ch+1));
 			NrecHitsPerChDistribution[ch]->Fill(recHitsVsEvt->GetBinContent(evt+1,ch+1));
@@ -203,12 +203,12 @@ void macro_certify_events(int run, string configDir)
     int binToEvt = 1000;
     int binBegin = 0, binEnd = 0;
 
-    for (binBegin = 0; binBegin < 12000; binBegin++)
+    for (binBegin = 0; binBegin < 24000; binBegin++)
     {
       if (NrecHitsPerChVsEvt[c]->GetBinContent(binBegin+1) < limitRecHitHVtrip)
       {
         cout << "Bad event: binBegin!" << endl;
-        for (binEnd = (binBegin+1); binEnd < 12000; binEnd++)
+        for (binEnd = (binBegin+1); binEnd < 24000; binEnd++)
         {
           if (NrecHitsPerChVsEvt[c]->GetBinContent(binEnd+1) > limitRecHitHVtrip)
           {
@@ -220,8 +220,8 @@ void macro_certify_events(int run, string configDir)
         {
           if (binBegin < 2) beginBadEvt[i].push_back(0 * binToEvt);
           if (binBegin >= 2) beginBadEvt[i].push_back((binBegin-2) * binToEvt);
-          if (binEnd <= (12000-2)) endBadEvt[i].push_back((binEnd+2) * binToEvt);
-          if (binEnd > (12000-2)) endBadEvt[i].push_back(12000 * binToEvt);
+          if (binEnd <= (24000-2)) endBadEvt[i].push_back((binEnd+2) * binToEvt);
+          if (binEnd > (24000-2)) endBadEvt[i].push_back(24000 * binToEvt);
         }
         binBegin = binEnd;
       }
