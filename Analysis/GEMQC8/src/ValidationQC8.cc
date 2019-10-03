@@ -519,21 +519,19 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
           int vfat = findVFAT(tlp.x(), min_x, max_x);
 
           bool validEvent = true;
-    			for (unsigned int i = 0; i < beginTripEvt[index].size(); i++)
-    			{
-    				if (beginTripEvt[index].at(i) <= nev && nev <= endTripEvt[index].at(i))
-    				{
-    					validEvent = false;
-    				}
-    			}
+    	  for (unsigned int i = 0; i < beginTripEvt[index].size(); i++)
+      	  {
+    		if (beginTripEvt[index].at(i) <= nev && nev <= endTripEvt[index].at(i))
+    		{
+    		  validEvent = false;
+    		}
+    	  }
 
           if (validEvent)
           {
             testTrajHitX[index] = gtrp.x();
             testTrajHitY[index] = gtrp.y();
             testTrajHitZ[index] = gtrp.z();
-            hitsVFATdenom->Fill(vfat-1,mRoll-1,index);
-            denom2DPerLayer->Fill(gtrp.x(),mRoll-1,index%10);
 
             g_nNumTrajHit++;
             nTrajHit++;
@@ -569,8 +567,35 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
               confTestHitX[index] = tempHitGP.x();
               confTestHitY[index] = tempHitGP.y();
               confTestHitZ[index] = tempHitGP.z();
-              hitsVFATnum->Fill(vfat-1,mRoll-1,index);
-              num2DPerLayer->Fill(tempHitGP.x(),mRoll-1,index%10);
+
+              n_roll = ch.nEtaPartitions();
+        	  minDeltaY = 50.;
+              int hitRoll = -1;
+              for (int r=0; r<n_roll; r++)
+              {
+                const BoundPlane& bproll = GEMGeometry_->idToDet(ch.etaPartition(r+1)->id())->surface();
+                Local3DPoint hittlp = bproll.toLocal(tempHitGP);
+                if (minDeltaY > fabs(hittlp.y()))
+                {
+                  minDeltaY = fabs(hittlp.y());
+                  hitRoll = r+1;
+                }
+              }
+
+              int n_strip = ch.etaPartition(hitRoll)->nstrips();
+        	  double min_x = ch.etaPartition(hitRoll)->centreOfStrip(0).x();
+        	  double max_x = ch.etaPartition(hitRoll)->centreOfStrip(n_strip-1).x();
+
+        	  Local3DPoint tempHitLP = tmpRecHit->localPosition();
+
+        	  int hitVFAT = findVFAT(tempHitLP.x(), min_x, max_x);
+
+              hitsVFATdenom->Fill(hitVFAT-1,hitRoll-1,index);
+              denom2DPerLayer->Fill(tempHitGP.x(),hitRoll-1,index%10);
+
+              hitsVFATnum->Fill(hitVFAT-1,hitRoll-1,index);
+              num2DPerLayer->Fill(tempHitGP.x(),hitRoll-1,index%10);
+
               nTrajRecHit++;
               g_nNumMatched++;
 
@@ -601,6 +626,11 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
                   nOfNonAssHits[recHitCh]++;
                 }
               }
+            }
+            if(!tmpRecHit)
+            {
+              hitsVFATdenom->Fill(vfat-1,mRoll-1,index);
+              denom2DPerLayer->Fill(gtrp.x(),mRoll-1,index%10);
             }
             nonAssRecHitsPerEvt->Fill(index,nOfNonAssHits[index]);
           }
