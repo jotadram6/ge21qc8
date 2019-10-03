@@ -240,7 +240,7 @@ if __name__ == '__main__':
   time.sleep(1)
 
   # Alignment computation & output
-  tilttwistCommand = "root -l -q " + runPath + "macro_tilt_twist.c(" + str(args.run_number) + ",\"" + runPath + "\",\"" + alignmentTablesPath + "\")"
+  tilttwistCommand = "root -l -q -b " + runPath + "macro_tilt_twist.c(" + str(args.run_number) + ",\"" + runPath + "\",\"" + alignmentTablesPath + "\")"
   tilttwist = subprocess.Popen(tilttwistCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=tilttwistoutDir)
   while tilttwist.poll() is None:
     line = tilttwist.stdout.readline()

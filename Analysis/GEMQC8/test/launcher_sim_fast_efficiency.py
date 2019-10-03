@@ -87,7 +87,7 @@ if __name__ == '__main__':
     time.sleep(1)
 
     # Efficiency computation & output
-    effCommand = "root -l -q " + runPath + "macro_fast_efficiency.c(" + run_number + ",\"" + configTablesPath + "\")"
+    effCommand = "root -l -q -b " + runPath + "macro_fast_efficiency.c(" + run_number + ",\"" + configTablesPath + "\")"
     efficiency = subprocess.Popen(effCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
     while efficiency.poll() is None:
         line = efficiency.stdout.readline()

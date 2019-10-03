@@ -122,7 +122,7 @@ if __name__ == '__main__':
 
     # Efficiency computation & output
     effoutDir = os.path.abspath("launcher_certify_events.py").split('QC8Test')[0] + outDirName
-    effCommand = "root -l -q " + runPath + "macro_certify_events.c(" + str(args.run_number) + ",\"" + configTablesPath + "\")"
+    effCommand = "root -l -q -b " + runPath + "macro_certify_events.c(" + str(args.run_number) + ",\"" + configTablesPath + "\")"
     efficiency = subprocess.Popen(effCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
     while efficiency.poll() is None:
         line = efficiency.stdout.readline()

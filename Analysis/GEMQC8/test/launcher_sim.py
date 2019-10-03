@@ -87,7 +87,7 @@ if __name__ == '__main__':
 
     # Efficiency computation & output
     startDateTime = "2019-03-14_09-04-00"
-    effCommand = "root -l -q " + runPath + "macro_validation.c(" + run_number + ",\"" + dataPath + "\",\"" + startDateTime + "\")"
+    effCommand = "root -l -q -b " + runPath + "macro_validation.c(" + run_number + ",\"" + dataPath + "\",\"" + startDateTime + "\")"
     efficiency = subprocess.Popen(effCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
     while efficiency.poll() is None:
         line = efficiency.stdout.readline()
