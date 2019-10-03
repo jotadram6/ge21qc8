@@ -295,7 +295,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 	TH2D *HGEff2D[10];
 	for (int row=0; row<10; row++)
 	{
-		HGEff2D->Divide(HGNum2D[row],HGDenom2D[row]);
+		HGEff2D[row]->Divide(HGNum2D[row],HGDenom2D[row]);
 	}
 
 	// Getting clusterSize 3D histogram
