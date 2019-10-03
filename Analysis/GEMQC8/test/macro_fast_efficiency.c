@@ -63,7 +63,7 @@ void macro_fast_efficiency(int run, string configDir)
 	TH2D *num2DvsEvt = (TH2D*)infile->Get("FastEfficiencyQC8/numeratorPerEvt");
   TH2D *denom2DvsEvt = (TH2D*)infile->Get("FastEfficiencyQC8/denominatorPerEvt");
 
-	TH2D *eff2DvsEvt = new TH2D("eff2DvsEvt","",2000,0,12000000,30,-0.5,29.5);
+	TH2D *eff2DvsEvt = new TH2D("eff2DvsEvt","",4000,0,24000000,30,-0.5,29.5);
 
 	eff2DvsEvt = (TH2D*)num2DvsEvt->Clone();
   eff2DvsEvt->Divide(denom2DvsEvt);
@@ -125,11 +125,11 @@ void macro_fast_efficiency(int run, string configDir)
 	for (unsigned int ch=0; ch<30; ch++)
 	{
 		sprintf(name,"NrecHitsVsEvent_ch_%u",ch);
-		NrecHitsPerChVsEvt[ch] = new TH2D(name,"",100000,0,10000000,8,0,8);
+		NrecHitsPerChVsEvt[ch] = new TH2D(name,"",48000,0,24000000,8,0,8);
 
 		for (unsigned int eta=0; eta<8; eta++)
 		{
-			for (int evt=0; evt<100000; evt++)
+			for (int evt=0; evt<48000; evt++)
 			{
 				NrecHitsPerChVsEvt[ch]->SetBinContent((evt+1),(eta+1),recHitsPerEtaVsEvt->GetBinContent(evt+1,ch+1,eta+1));
 			}

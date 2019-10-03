@@ -29,15 +29,15 @@ FastEfficiencyQC8::FastEfficiencyQC8(const edm::ParameterSet& cfg): GEMBaseValid
 	DiEtaCorrespondingRecHits = fs->make<TH1D>("DiEtaCorrespondingRecHits","Delta iEta of corresponding recHits",16,-8,8);
 
 	// nRecHitsPerEventPerChamber: evolution in time
-	nRecHitsPerEvtPerCh = fs->make<TH3D>("nRecHitsPerEvtPerCh","recHits per ieta per ch vs event (packages of 100 evts = 1 sec)",100000,0,10000000,30,0,30,8,0,8);
+	nRecHitsPerEvtPerCh = fs->make<TH3D>("nRecHitsPerEvtPerCh","recHits per ieta per ch vs event (packages of 500 evts = 5 sec)",48000,0,24000000,30,0,30,8,0,8);
 
 	// Numerator and denominator
 	numerator = fs->make<TH1D>("numerator","numerator",30,0,30);
 	denominator = fs->make<TH1D>("denominator","denominator",30,0,30);
 
 	// Numerator and denominator: evolution in time
-	numeratorPerEvt = fs->make<TH2D>("numeratorPerEvt","numerator per ch vs event (packages of 6k evts = 1 min)",2000,0,12000000,30,-0.5,29.5);
-	denominatorPerEvt = fs->make<TH2D>("denominatorPerEvt","denominator per ch vs event (packages of 6k evts = 1 min)",2000,0,12000000,30,-0.5,29.5);
+	numeratorPerEvt = fs->make<TH2D>("numeratorPerEvt","numerator per ch vs event (packages of 6k evts = 1 min)",4000,0,24000000,30,-0.5,29.5);
+	denominatorPerEvt = fs->make<TH2D>("denominatorPerEvt","denominator per ch vs event (packages of 6k evts = 1 min)",4000,0,24000000,30,-0.5,29.5);
 
 	// Tree branches declaration
 
@@ -319,18 +319,6 @@ void FastEfficiencyQC8::analyze(const edm::Event& e, const edm::EventSetup& iSet
 	{
 		if (fired_ch_test[i]==true) counter++;
 	}
-
-	/*if (counter == 4)
-	{
-		for (int i=0; i<30; i++)
-		{
-			for (unsigned int i_ch = 0; i_ch < xRecHit[i].size(); i_ch++)
-			{
-				if (fired_ch_test[i]==true) cout << "Chamber " << i << " / x: " << xRecHit[i].at(i_ch) << " / iEta: " << iEtaRecHit[i].at(i_ch) << endl;
-			}
-		}
-		cout << "------------------------------------------------------------------" << endl;
-	}*/
 
 	// Reference: odd chambers, Under test: even chambers
 	for (int ch=1; ch<=29; ch+=2)
