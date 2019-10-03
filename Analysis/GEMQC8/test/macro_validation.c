@@ -293,9 +293,14 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 	// High Granularity Efficiency per layer histogram
 
 	TH2D *HGEff2D[10];
-	for (int row=0; row<10; row++)
+	for (int row=0; row<5; row++)
 	{
-		HGEff2D[row]->Divide(HGNum2D[row],HGDenom2D[row]);
+		namename = "efficiency_high_granularity_row_" + to_string(row+1) + "_B";
+		HGEff2D[row*2] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+		HGEff2D[row*2]->Divide(HGNum2D[row*2],HGDenom2D[row*2]);
+		namename = "efficiency_high_granularity_row_" + to_string(row+1) + "_T";
+		HGEff2D[(row*2)+1] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+		HGEff2D[(row*2)+1]->Divide(HGNum2D[(row*2)+1],HGDenom2D[(row*2)+1]);
 	}
 
 	// Getting clusterSize 3D histogram
