@@ -43,8 +43,8 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   recHits2DPerLayer = fs->make<TH3D>("recHits2DPerLayer","recHits per layer",2000,-100,100,8,0,8,10,0,10);
   associatedHits2DPerLayer = fs->make<TH3D>("associatedHits2DPerLayer","Associated recHits to track per layer",2000,-100,100,8,0,8,10,0,10);
   nonAssociatedHits2DPerLayer = fs->make<TH3D>("nonAssociatedHits2DPerLayer","Non associated recHits to track per layer",2000,-100,100,8,0,8,10,0,10);
-  num2DPerLayer = fs->make<TH3D>("num2DPerLayer","Numerator per layer",200,-100,100,8,0,8,10,0,10);
-  denom2DPerLayer = fs->make<TH3D>("denom2DPerLayer","Denominator per layer",200,-100,100,8,0,8,10,0,10);
+  num2DPerLayer = fs->make<TH3D>("num2DPerLayer","Numerator per layer",600,-100,100,8,0,8,10,0,10);
+  denom2DPerLayer = fs->make<TH3D>("denom2DPerLayer","Denominator per layer",600,-100,100,8,0,8,10,0,10);
   recHitsPerEvt = fs->make<TH1D>("recHitsPerEvt","recHits per event",1000,0,1000);
   nonAssRecHitsPerEvt = fs->make<TH2D>("nonAssRecHitsPerEvt","Non associated recHits per event",30,0,30,100,0,100);
   clusterSize = fs->make<TH3D>("clusterSize","clusterSize per chamber per eta partition",30,0,30,8,0,8,20,0,20);

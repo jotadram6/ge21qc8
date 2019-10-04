@@ -248,16 +248,16 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 	for (int row=0; row<5; row++)
 	{
 		namename = "numerator_high_granularity_row_" + to_string(row+1) + "_B";
-		HGNum2D[row*2] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+		HGNum2D[row*2] = new TH2D(namename.c_str(),"",600,-100,100,8,-0.5,7.5);
 		namename = "numerator_high_granularity_row_" + to_string(row+1) + "_T";
-		HGNum2D[(row*2)+1] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+		HGNum2D[(row*2)+1] = new TH2D(namename.c_str(),"",600,-100,100,8,-0.5,7.5);
 	}
 
 	for (int layer=0; layer<10; layer++)
 	{
 		for (int eta=1; eta<=8; eta++)
 		{
-			for (int phi=1; phi<=200; phi++)
+			for (int phi=1; phi<=600; phi++)
 			{
 				HGNum2D[layer]->SetBinContent(phi,eta,numPerLayer->GetBinContent(phi,eta,layer+1));
 			}
@@ -274,16 +274,16 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 	for (int row=0; row<5; row++)
 	{
 		namename = "denominator_high_granularity_row_" + to_string(row+1) + "_B";
-		HGDenom2D[row*2] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+		HGDenom2D[row*2] = new TH2D(namename.c_str(),"",600,-100,100,8,-0.5,7.5);
 		namename = "denominator_high_granularity_row_" + to_string(row+1) + "_T";
-		HGDenom2D[(row*2)+1] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+		HGDenom2D[(row*2)+1] = new TH2D(namename.c_str(),"",600,-100,100,8,-0.5,7.5);
 	}
 
 	for (int layer=0; layer<10; layer++)
 	{
 		for (int eta=1; eta<=8; eta++)
 		{
-			for (int phi=1; phi<=200; phi++)
+			for (int phi=1; phi<=600; phi++)
 			{
 				HGDenom2D[layer]->SetBinContent(phi,eta,denomPerLayer->GetBinContent(phi,eta,layer+1));
 			}
@@ -296,10 +296,10 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 	for (int row=0; row<5; row++)
 	{
 		namename = "efficiency_high_granularity_row_" + to_string(row+1) + "_B";
-		HGEff2D[row*2] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+		HGEff2D[row*2] = new TH2D(namename.c_str(),"",600,-100,100,8,-0.5,7.5);
 		HGEff2D[row*2]->Divide(HGNum2D[row*2],HGDenom2D[row*2]);
 		namename = "efficiency_high_granularity_row_" + to_string(row+1) + "_T";
-		HGEff2D[(row*2)+1] = new TH2D(namename.c_str(),"",200,-100,100,8,-0.5,7.5);
+		HGEff2D[(row*2)+1] = new TH2D(namename.c_str(),"",600,-100,100,8,-0.5,7.5);
 		HGEff2D[(row*2)+1]->Divide(HGNum2D[(row*2)+1],HGDenom2D[(row*2)+1]);
 	}
 
