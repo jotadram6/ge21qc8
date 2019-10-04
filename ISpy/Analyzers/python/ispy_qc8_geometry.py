@@ -1,12 +1,20 @@
-import sys, os
+import sys
+import os
+import datetime
+print datetime.datetime.now()
+import socket
 import FWCore.ParameterSet.Config as cms
+
 sys.path.append(os.getenv('CMSSW_BASE')+'/src/Analysis/GEMQC8/test')
+
 import configureRun_cfi as runConfig
 
-run_number = 200
-SuperChType = ['S','S','S','0','S',\
-               'S','S','S','S','S',\
-               '0','0','0','0','0']
+run_number = runConfig.RunNumber
+
+# The superchambers in the 15 slots
+SuperChType = runConfig.StandConfiguration
+
+print(SuperChType)
 
 # Define and find column type. Default is L. If it is found an S in a column, that column type becomes S.
 colType = ['S','S','S']
@@ -15,8 +23,14 @@ for col in range(0,3):
         if (SuperChType[col*5+row]=='L'):
 			colType[col] = 'L'
 
+print(colType)
+
 # Calculation of SuperChSeedingLayers from SuperChType
-SuperChSeedingLayers = [0]*30
+SuperChSeedingLayers = []
+
+for i in range (0,30):
+    SuperChSeedingLayers.append(0)
+
 for j in range (0,3):
     for i in range (5*j,5*(j+1)):
         if (SuperChType[i]!='0'):
@@ -29,8 +43,13 @@ for j in range (0,3):
             SuperChSeedingLayers[i*2+1]=2
             break
 
+print(SuperChSeedingLayers)
+
 from Configuration.StandardSequences.Eras import eras
+
 process = cms.Process("ISPY")
+
+# import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
