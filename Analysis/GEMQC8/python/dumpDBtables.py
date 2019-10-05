@@ -6,8 +6,10 @@ import time
 def getConfigurationTable(run_num,runDateTime):
     print "\nDownloading ConfigurationTable for run {0}".format(run_num)
 
-    #db = cx_Oracle.connect('GEM_904_COND/904CondDB@INT2R') # development DB
-    db = cx_Oracle.connect('CMS_COND_GENERAL_R/p3105rof@cms_omds_adg') # production DB
+    db_cond = os.environ["GEM_PRODUCTION_DB_COND"]
+    db_name = os.environ["GEM_PRODUCTION_DB_NAME"]
+
+    db = cx_Oracle.connect(db_cond+db_name) # production DB
     cur = db.cursor()
 
     delta_min = 94608000 # minimum value of delta (this value is the # of seconds in 3 years)
@@ -72,8 +74,10 @@ def getConfigurationTable(run_num,runDateTime):
 def getAlignmentTable(run_num):
     print "\nDownloading AlignmentTable for run {0}".format(run_num)
 
-    #db = cx_Oracle.connect('GEM_904_COND/904CondDB@INT2R') # development DB
-    db = cx_Oracle.connect('CMS_COND_GENERAL_R/p3105rof@cms_omds_adg') # production DB
+    db_cond = os.environ["GEM_PRODUCTION_DB_COND"]
+    db_name = os.environ["GEM_PRODUCTION_DB_NAME"]
+
+    db = cx_Oracle.connect(db_cond+db_name) # production DB
     cur = db.cursor()
 
     query = "select * from CMS_GEM_MUON_VIEW.QC8_GEM_ALIGNMENT_VIEW_RH where RUN_NUMBER="+str(run_num)
@@ -114,8 +118,10 @@ def getAlignmentTable(run_num):
 def getHotStripsTable(run_num):
     print "\nDownloading HotStripsTable for run {0}".format(run_num)
 
-    #db = cx_Oracle.connect('GEM_904_COND/904CondDB@INT2R') # development DB
-    db = cx_Oracle.connect('CMS_COND_GENERAL_R/p3105rof@cms_omds_adg') # production DB
+    db_cond = os.environ["GEM_PRODUCTION_DB_COND"]
+    db_name = os.environ["GEM_PRODUCTION_DB_NAME"]
+
+    db = cx_Oracle.connect(db_cond+db_name) # production DB
     cur = db.cursor()
 
     query = "select * from CMS_GEM_MUON_VIEW.QC8_GEM_MASKED_STRIPS_HOT_V_RH where RUN_NUMBER="+str(run_num)
@@ -155,8 +161,10 @@ def getHotStripsTable(run_num):
 def getDeadStripsTable(run_num):
     print "\nDownloading DeadStripsTable for run {0}".format(run_num)
 
-    #db = cx_Oracle.connect('GEM_904_COND/904CondDB@INT2R') # development DB
-    db = cx_Oracle.connect('CMS_COND_GENERAL_R/p3105rof@cms_omds_adg') # production DB
+    db_cond = os.environ["GEM_PRODUCTION_DB_COND"]
+    db_name = os.environ["GEM_PRODUCTION_DB_NAME"]
+
+    db = cx_Oracle.connect(db_cond+db_name) # production DB
     cur = db.cursor()
 
     query = "select * from CMS_GEM_MUON_VIEW.QC8_GEM_MASKED_STRIPS_DEAD_RH where RUN_NUMBER="+str(run_num)
