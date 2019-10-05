@@ -31,7 +31,7 @@ end_period = "'" + end_period + "'"
 fileName = "QC8_HV_monitor_UTC_start_"+start+"_end_"+end+".root"
 f1=ROOT.TFile( fileName,"RECREATE")
 
-#divide the monitoring period in three periods 
+#divide the monitoring period in three periods
 #the limits between period 1 and 2 is defined by the first  date in which we changed the mapping of HV: 03-Apr-2019 13.10
 #the limits between period 2 and 3 is defined by the second date in which we changed the mapping of HV: 15-Apr-2019 08:15
 
@@ -40,7 +40,7 @@ f1=ROOT.TFile( fileName,"RECREATE")
 
 mappingChangeDate = []
 firstMappingChange 	= datetime( 2019, 04, 03, 13, 10, 00 )
-secondMappingChange 	= datetime( 2019, 04, 15,  8, 15, 00 ) 
+secondMappingChange 	= datetime( 2019, 04, 15,  8, 15, 00 )
 mappingChangeDate.append( firstMappingChange )
 mappingChangeDate.append( secondMappingChange )
 
@@ -58,7 +58,7 @@ startIdx = -1
 endIdx = -1
 #find the index for mapping start and end
 
-if startDate < mappingChangeDate[0]: 
+if startDate < mappingChangeDate[0]:
 	startIdx = 0
 elif (startDate > mappingChangeDate[0] and startDate < mappingChangeDate[1]):
 	startIdx = 1
@@ -66,7 +66,7 @@ elif startDate > mappingChangeDate[1]:
 	startIdx = 2
 #print "startIdx:", startIdx
 
-if endDate < mappingChangeDate[0]: 
+if endDate < mappingChangeDate[0]:
 	endIdx = 0
 elif endDate > mappingChangeDate[0] and endDate < mappingChangeDate[1]:
 	endIdx = 1
@@ -80,7 +80,7 @@ while periodIdx <= endIdx:
 	periodBool[ periodIdx ] = 1
 	periodIdx = periodIdx + 1
 
-#print periodBool 
+#print periodBool
 
 #validity limits needed for the query of ELEMENT_ID
 #find the first one and the last one in the bool vector
@@ -92,7 +92,7 @@ lastOne  = max(loc for loc, val in enumerate(periodBool) if val == 1)
 sinceDelimiter = []
 tillDelimiter = []
 
-#three cases: 
+#three cases:
 #only one period section used
 #first period used
 if firstOne == 0 and lastOne == 0:
@@ -202,35 +202,35 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 	#create directories
         firstDir = f1.mkdir("Chamber"+chamberList[indexB])
         firstDir.cd()
-	
+
 	for indexC in range(len(channelList)): #ok for channels from 0 to 6
 		#create directories
 		secondDir = firstDir.mkdir("Channel"+channelList[indexC])
 		secondDir.cd()
-		
+
 		#set bin size
 		IMinHV = -10		#uA
 		IMaxHV = 10  		#uA
 		IResolutionHV = 0.02 	#uA
-		INbinHV = int((IMaxHV - IMinHV)/IResolutionHV) 
-		
-		Imonh1 = ROOT.TH1F("HV_ImonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_ImonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1", INbinHV, IMinHV, IMaxHV)	
+		INbinHV = int((IMaxHV - IMinHV)/IResolutionHV)
+
+		Imonh1 = ROOT.TH1F("HV_ImonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_ImonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1", INbinHV, IMinHV, IMaxHV)
 		Imonh1.GetXaxis().SetTitle("I [uA]")
                 Imonh1.GetYaxis().SetTitle("counts")
 
-		#set bin size	
+		#set bin size
 		VMinHV = -50		#V
                 VMaxHV = 2000  		#V
                 VResolutionHV = 0.02 	#V
-                VNbinHV = int((VMaxHV - VMinHV)/VResolutionHV) 
-	
-		Vmonh1 = ROOT.TH1F("HV_VmonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_VmonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1",VNbinHV,VMinHV,VMaxHV)	
+                VNbinHV = int((VMaxHV - VMinHV)/VResolutionHV)
+
+		Vmonh1 = ROOT.TH1F("HV_VmonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_VmonChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1",VNbinHV,VMinHV,VMaxHV)
 		Vmonh1.GetXaxis().SetTitle("V [V]")
                 Vmonh1.GetYaxis().SetTitle("counts")
 
 		ImonTh1List.append(Imonh1)
 		VmonTh1List.append(Vmonh1)
-		
+
 		#I define 5 status categories
 		#type 0: off (bit 0)
 		#type 1: on (bit 0)
@@ -239,9 +239,9 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#type 4: etx trip (6), MAX V (7), EXT disable (8), Internal Trip (9), calibration error(10)
 		#type 5: calib error (10)
 		#type 6: unplugged (11)
-		
-		Smonh1 = ROOT.TH1F("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1", 4100, 0, 4100)	
-		#Smonh1 = ROOT.TH1F("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1",9,-1, 8)	
+
+		Smonh1 = ROOT.TH1F("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1", 4100, 0, 4100)
+		#Smonh1 = ROOT.TH1F("HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1","HV_StatusChamber"+chamberList[indexB]+"_"+channelList[indexC]+"_TH1",9,-1, 8)
                 #Smonh1.GetXaxis().SetTitle("Status cathegory")
                 Smonh1.GetXaxis().SetTitle("Status code")
                 Smonh1.GetYaxis().SetTitle("counts")
@@ -254,8 +254,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 
 		#for boardN in range(insertedBoards): #ok for boards from 0 to 15
 		#for channelN in range(insertedChannels): #ok for channels from 0 to 13
-		
-		#find the number of the board from the name		
+
+		#find the number of the board from the name
 		indexTB = 0
 		for form1 in ChamberMapList:
 			form2 = chamberList[indexB][:-4] #remove -Top or -Bot from the name to make a match
@@ -273,11 +273,11 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			indexTB = indexTB +1
 
 
-	
+
 		#print("board", board)
-		
+
 		#add 7 for bot chambers (from 7 to 13), top (0-6)
-		
+
 		indexTC = indexC
 		if chamberList[indexB][4:] == "Bot":
 			indexTC = indexC + 7
@@ -288,9 +288,9 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			channel = "channel0"+str(indexTC)
 
 		#indexTB is the posiion in the list when the required chamber is found
-		
+
 		#print ("counter before query:", counter)
-		
+
 		# this 3 parameters can be input to the script
 		#Three maps are inserted so we have to choose the right one
 		#create a query string for the maps that must me used
@@ -324,12 +324,15 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		print "\nimonNameList", imonNameList
 		print "vomnNameList", vmonNameList
 		print "statusNameList", statusNameList
-	
 
-		#this is the connection to DB, and the contact point to DB should be input to the script 
-		#to avoid the have explicitely the pw in the script (the schema is the first field, then psw and after @ is the server ) 
-		db = cx_Oracle.connect('GEM_904_COND/904CondDB@INT2R')
-		cur=db.cursor()
+
+		#this is the connection to DB, and the contact point to DB should be input to the script
+		#to avoid the have explicitely the pw in the script (the schema is the first field, then psw and after @ is the server )
+		db_cond = os.environ["GEM_DEVELOPMENT_DB_COND"]
+	    db_name = os.environ["GEM_DEVELOPMENT_DB_NAME"]
+
+	    db = cx_Oracle.connect(db_cond+db_name) # production DB
+	    cur = db.cursor()
 
 		#query =  "select ELEMENT_ID, ELEMENT_NAME from ELEMENTS"
 		#cur.execute(query)
@@ -364,11 +367,11 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 				#VALID_TILL is not found for the most recent ELEMENT_ID
 				#in this case I put the end date as its VALID_TILL
 				imonID = result[0]
-				imonIDsince = result[1]	
+				imonIDsince = result[1]
 				imonIDtill = result[2]
 
 				if imonIDtill is None:
-					imonIDtill = datetime( 2050, 04, 15,  8, 15, 00 ) 
+					imonIDtill = datetime( 2050, 04, 15,  8, 15, 00 )
 
 				imonIdList.append( imonID )
 				sinceImonList.append( imonIDsince )
@@ -380,8 +383,8 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		imonIDsort = sorted(imonIDsort, key=lambda elementIDimon: elementIDimon[1])
 
 		#print "imonIDsort ", imonIDsort
-		
-		#I have to reject the ID that are not necessary for our time period 
+
+		#I have to reject the ID that are not necessary for our time period
 		#write 1 in the period observed in the monitoring
 		firstOneImon = -1
 		lastOneImon = -1
@@ -403,7 +406,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			imonIDBool[ timesOneFill + firstOneImon ] = 1
 
 		#print "imonIDsort ", imonIDsort
-		
+
 		imonIDToUse = []
 		for idxIdImon in range( len(imonIDsort) ):
 			if imonIDBool[ idxIdImon ] == 1:
@@ -427,24 +430,24 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 		#VALID_TILL is not found for the most recent ELEMENT_ID
                 		#in this case I put the end date as its VALID_TILL
                 		vmonID = result[0]
-                		vmonIDsince = result[1]	
+                		vmonIDsince = result[1]
                 		vmonIDtill = result[2]
-                                                                                                                                                    
+
                 		if vmonIDtill is None:
-                			vmonIDtill = datetime( 2050, 04, 15,  8, 15, 00 ) 
-                                                                                                                                                    
+                			vmonIDtill = datetime( 2050, 04, 15,  8, 15, 00 )
+
                 		vmonIdList.append( vmonID )
                 		sinceVmonList.append( vmonIDsince )
                 		tillVmonList.append( vmonIDtill )
-                                                                                                                                                    
+
                 		internalSortList = ( vmonID, vmonIDsince, vmonIDtill )
 	        		vmonIDsort.append( internalSortList )
-                                                                                                                                                    
+
                 vmonIDsort = sorted(vmonIDsort, key=lambda elementIDvmon: elementIDvmon[1])
-                                                                                                                                                    
+
                 #print "vmonIDsort ", vmonIDsort
-                
-                #I have to reject the ID that are not necessary for our time period 
+
+                #I have to reject the ID that are not necessary for our time period
                 #write 1 in the period observed in the monitoring
                 firstOneVmon = -1
                 lastOneVmon = -1
@@ -457,16 +460,16 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 	#lastOneVmon
                 	if endDate > vmonIDsort[idxIdVmon][1] and endDate < vmonIDsort[idxIdVmon][2]:
                 		lastOneVmon = idxIdVmon
-                                                                                                                                                    
+
                 #print "firstOneVmon", firstOneVmon
                 #print "lastOneVmon", lastOneVmon
-                                                                                                                                                    
+
                 #I write one in all the active periods
                 for timesOneFill in range( lastOneVmon - firstOneVmon + 1 ):
                 	vmonIDBool[ timesOneFill + firstOneVmon ] = 1
-                                                                                                                                                    
+
                 #print "vmonIDsort ", vmonIDsort
-                
+
                 vmonIDToUse = []
                 for idxIdVmon in range( len(vmonIDsort) ):
                 	if vmonIDBool[ idxIdVmon ] == 1:
@@ -491,24 +494,24 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 		#VALID_TILL is not found for the most recent ELEMENT_ID
                 		#in this case I put the end date as its VALID_TILL
                 		statusID = result[0]
-                		statusIDsince = result[1]	
+                		statusIDsince = result[1]
                 		statusIDtill = result[2]
-                                                                                                                                                    
+
                 		if statusIDtill is None:
-                			statusIDtill = datetime( 2050, 04, 15,  8, 15, 00 ) 
-                                                                                                                                                    
+                			statusIDtill = datetime( 2050, 04, 15,  8, 15, 00 )
+
                 		statusIdList.append( statusID )
                 		sinceStatusList.append( statusIDsince )
                 		tillStatusList.append( statusIDtill )
-                                                                                                                                                    
+
                 		internalSortList = ( statusID, statusIDsince, statusIDtill )
                 		statusIDsort.append( internalSortList )
-                                                                                                                                                    
+
                 statusIDsort = sorted(statusIDsort, key=lambda elementIDstatus: elementIDstatus[1])
-                                                                                                                                                    
+
                 #print "statusIDsort ", statusIDsort
-                
-                #I have to reject the ID that are not necessary for our time period 
+
+                #I have to reject the ID that are not necessary for our time period
                 #write 1 in the period observed in the monitoring
                 firstOneStatus = -1
                 lastOneStatus = -1
@@ -521,28 +524,28 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 	#lastOneStatus
                 	if endDate > statusIDsort[idxIdStatus][1] and endDate < statusIDsort[idxIdStatus][2]:
                 		lastOneStatus = idxIdStatus
-                                                                                                                                                    
+
                 #print "firstOneStatus", firstOneStatus
                 #print "lastOneStatus", lastOneStatus
-                                                                                                                                                    
+
                 #I write one in all the active periods
                 for timesOneFill in range( lastOneStatus - firstOneStatus + 1 ):
                 	statusIDBool[ timesOneFill + firstOneStatus ] = 1
-                                                                                                                                                    
+
                 #print "statusIDsort ", statusIDsort
-                
+
                 statusIDToUse = []
                 for idxIdStatus in range( len(statusIDsort) ):
                 	if statusIDBool[ idxIdStatus ] == 1:
                 		statusIDToUse.append( statusIDsort[ idxIdStatus ][0] )
-                                                
-                #delete duplicate IDs                                
+
+                #delete duplicate IDs
                 statusIDToUse = list(dict.fromkeys( statusIDToUse ))
 		print "statusIDToUse", statusIDToUse
 
 		#USEFUL TO DEBUG IDs
 		#print "imonNameList ", imonIdList
-		#print "sinceImonList ", sinceImonList 
+		#print "sinceImonList ", sinceImonList
 		#print "tillImonList ", tillImonList
 		#print "vmonNameList ", vmonIdList
 		#print "sinceVmonList ", sinceVmonList
@@ -551,12 +554,12 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#print "sinceStatusList ", sinceStatusList
 		#print "tillStatusList ", tillStatusList
 		#print "IMON_ID ", imon_id," VMON_ID ", vmon_id," STATUS_ID ", status_id
-	
-	
+
+
 		#do the query to fill the Histos with I
 		if len( imonIDToUse ) == 0:
 			print "ERROR: len(imonIDToUse)=0"
-			file = open("HVErr.log", "w")                                     			
+			file = open("HVErr.log", "w")
                         file.write("ERROR: len(imonIDToUse)=0")
                         file.close()
 		elif len( imonIDToUse ) == 1:
@@ -568,9 +571,9 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 				if ( len( imonIDToUse ) > 1 and strIdx < ( len( imonIDToUse ) - 1 ) ):
 					query = query + " or "
 			query = query + ") and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
-				
-		print query 
-		cur.execute(query)                                                                                                                             
+
+		print query
+		cur.execute(query)
 		curimon=cur
 		imonRec=[]
 		imonOnlyT = array ( 'd' )
@@ -596,12 +599,12 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                    tot_milliImon=tot_secondsImon*1000.
                    #print("totmilliImon=", tot_milliImon)
                    #print(imonRec[contatoreI])
-		   
+
 		   #lists with only I and t
 		   imonOnlyT.append(tot_secondsImon)
 		   imonOnlyI.append(result[1])
 		   imonOnlyTDate.append(4.) #an any float number
-		  
+
 		   #print currentTsImon
                    year = str(currentTsImon)[0:4]
                    #print year
@@ -617,12 +620,12 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                    #print second
                    micro = str(currentTsImon)[20:26]
                    #print micro
-                                                                                                       
+
                    #longString = ROOT.TString( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
                    longList =str( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
-                                                                                                       
+
                    da1 = ROOT.TDatime( longList )
-                                                                                                       
+
                    imonOnlyTDate[-1] = da1.Convert()
 		   floatMicro = "0."+micro
 		   #print floatMicro
@@ -652,30 +655,30 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 for sortCountI in range(len(imonOnlyT)):
                 	internalListI = (imonOnlyT[sortCountI], imonOnlyI[sortCountI], imonOnlyTDate[sortCountI])
                 	SortListI.append(internalListI)
-                                                                                                                
+
                 #print(SortListI)
                 SortListI = sorted(SortListI, key=lambda elementI: elementI[0])
                 #print(SortListI)
-                
+
                 for refillI in range(len(imonOnlyT)):
                 	imonOnlyT[refillI]=SortListI[refillI][0]
                 	imonOnlyI[refillI]=SortListI[refillI][1]
                 	imonOnlyTDate[refillI]=SortListI[refillI][2]
-                                                                                                                
+
                 #print(imonOnlyI)
 		#print(imonOnlyTDate)
-                
+
                 #rescale the negative times
 		if (len(imonOnlyT))==0:
 			print("imonOnlyT lenght", len(imonOnlyT))
 			print("------------------------------------------------------------------")
 			print("ERROR: there are no I current data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
 			print("------------------------------------------------------------------")
-		
-			file = open("HVErr.log", "w") 
-			file.write("ERROR: there are no I current data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
-			file.close() 
-			
+
+			file = open("HVErr.log", "w")
+			file.write("ERROR: there are no I current data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
+			file.close()
+
 			#counter = counter + 1
 
 			#I put an anomalous current value if there is no data
@@ -683,7 +686,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			imonOnlyTDate.append(0.)
 			imonOnlyI.append(-1000000000)
 			#continue
-			
+
 
 
                 negativeStartI = imonOnlyT[0]
@@ -714,14 +717,14 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 
 		#ImonTgraph1List += [Imontg1]
 		#ImonTgraph1List.append(Imontg1)
-		#ImonTgraph1List[counter].Write()	
+		#ImonTgraph1List[counter].Write()
 		Imontg1.Write()
 
-		
+
 		#do the query to fill the Histos with V
                 if len( vmonIDToUse ) == 0:
                 	print "ERROR: len(vmonIDToUse)=0"
-                	file = open("HVErr.log", "w")                                     			
+                	file = open("HVErr.log", "w")
                         file.write("ERROR: len(vmonIDToUse)=0")
                         file.close()
                 elif len( vmonIDToUse ) == 1:
@@ -733,9 +736,9 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 		if ( len( vmonIDToUse ) > 1 and strIdx < ( len( vmonIDToUse ) - 1 ) ):
                 			query = query + " or "
                 	query = query + ") and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
-                		
-                print query 
-                cur.execute(query)                                                                                                                             
+
+                print query
+                cur.execute(query)
 
 		#result[0] is the present TS
 		#result[1] is the voltage
@@ -748,7 +751,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		isNotEmptyVmon = False
 		for result in curvmon:
 		   #start ts: the first read Ts
-		   if contatoreV == 0: 
+		   if contatoreV == 0:
 	   	   	#print("dentroV", contatoreV)
 		   	startTsVmon = result[0]
 		   isNotEmptyVmon = True
@@ -764,13 +767,13 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   tot_milliVmon=tot_secondsVmon*1000.
 		   #print("totmilliVmon=", tot_milliVmon)
 		   #print(vmonRec[contatoreV])
-		
+
 		   #lists with only V and t
                    vmonOnlyT.append(tot_secondsVmon)
                    vmonOnlyV.append(result[1])
 
 		   vmonOnlyTDate.append(4.) #an any float number
-                                                                                                        
+
                    #print currentTsVmon
                    year = str(currentTsVmon)[0:4]
                    #print year
@@ -786,24 +789,24 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                    #print second
                    micro = str(currentTsVmon)[20:]
                    #print micro
-                                                                                                       
+
                    #longString = ROOT.TString( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
                    longList = str( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
-                                                                                                       
+
                    da1 = ROOT.TDatime( longList )
-                                                                                                       
+
                    vmonOnlyTDate[-1] = da1.Convert()
 
 		   floatMicro = "0."+micro
                    #print floatMicro
 		   vmonOnlyTDate[contatoreV] = vmonOnlyTDate[contatoreV] + float(floatMicro) #add microseconds to times (all ending with .0 because of Convert)
-		   
+
 		   contatoreV=contatoreV+1
 
 
 
 		VmonTh1List[counter].Write()
-		
+
 		#create a TGraph for Imon (V vs time)
                 if len(vmonOnlyT) != len(vmonOnlyV):
                 	print ("filling vector different lenght")
@@ -824,38 +827,38 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 for sortCountV in range(len(vmonOnlyT)):
                 	internalListV = (vmonOnlyT[sortCountV], vmonOnlyV[sortCountV], vmonOnlyTDate[sortCountV] )
                 	SortListV.append(internalListV)
-                                                                                                                
+
                 #print(SortListV)
                 SortListV = sorted(SortListV, key=lambda elementV: elementV[0])
                 #print(SortListV)
-                
+
                 for refillV in range(len(vmonOnlyT)):
                 	vmonOnlyT[refillV]=SortListV[refillV][0]
                 	vmonOnlyV[refillV]=SortListV[refillV][1]
                 	vmonOnlyTDate[refillV]=SortListV[refillV][2]
-                                                                                                                
+
                 #print(vmonOnlyT)
                 #print(vmonOnlyV)
-               
+
 		if (len(vmonOnlyT))==0:
 			print("vmonOnlyT lenght", len(vmonOnlyT))
                 	print("------------------------------------------------------------------")
                 	print("ERROR: there are no HV voltage data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
                 	print("------------------------------------------------------------------")
-                
-                	file = open("HVErr.log", "w") 
-                	file.write("ERROR: there are no HV voltage data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
-                	file.close() 
-                
-			#counter = counter + 1 	
+
+                	file = open("HVErr.log", "w")
+                	file.write("ERROR: there are no HV voltage data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
+                	file.close()
+
+			#counter = counter + 1
 			#I put an anomalous voltage value if there is no data
                         vmonOnlyT.append(0.)
                         vmonOnlyTDate.append(0.)
                         vmonOnlyV.append(-1000000000)
-                		
+
                 	#continue
 
- 
+
                 #rescale the negative times
                 negativeStartV = vmonOnlyT[0]
                 if vmonOnlyT[0] < 0:
@@ -886,13 +889,13 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 #VmonTgraph1List.append(Vmontg1)
                 #VmonTgraph1List[counter].Write()
 		Vmontg1.Write()
-	
+
 
 
 		#do the query to fill the Histos with status
                 if len( statusIDToUse ) == 0:
                 	print "ERROR: len(statusIDToUse)=0"
-                	file = open("HVErr.log", "w")                                     			
+                	file = open("HVErr.log", "w")
                         file.write("ERROR: len(statusIDToUse)=0")
                         file.close()
                 elif len( statusIDToUse ) == 1:
@@ -904,9 +907,9 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 		if ( len( statusIDToUse ) > 1 and strIdx < ( len( statusIDToUse ) - 1 ) ):
                 			query = query + " or "
                 	query = query + ") and TS > to_date ("+sta_period+",'YYYY-MM-DD HH24:MI:SS') and TS < to_date ("+end_period+",'YYYY-MM-DD HH24:MI:SS')"
-                		
-                print query 
-                cur.execute(query)                                                                                                                             
+
+                print query
+                cur.execute(query)
 
 		curstat=cur
 		statRec=[]
@@ -930,22 +933,22 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   #print ("statusbin", bin(int(result[1])))
 		   currentTsSmon = result[0] #put the present TS value in currentTsSmon
 		   decimalStatus = int(result[1])
-		   tot_secondsSmon = (currentTsSmon-startTsSmon).total_seconds()	
+		   tot_secondsSmon = (currentTsSmon-startTsSmon).total_seconds()
 		   #use milli seconds to sort the time vector (at the end)
-		   tot_milliSmon=int(tot_secondsSmon*1000.) 
-	 
+		   tot_milliSmon=int(tot_secondsSmon*1000.)
+
 		   #print a 12 bit binary status number
 		   binStat = bin(int(result[1]))[2:] #to take away the 0b in front of the binary number
 		   lenStat = len(binStat)
-		   binStat = str(0) * (nBit - lenStat) + binStat	
-		   binStat = "0b"+binStat	
+		   binStat = str(0) * (nBit - lenStat) + binStat
+		   binStat = "0b"+binStat
 		   smonOnlyBinStat.append(binStat)
 		   #print("time", result[0], "status bin", binStat )
-		   #print("status totseconds", tot_secondsSmon)		  
+		   #print("status totseconds", tot_secondsSmon)
 
 		   extensibleStat = ""
 		   #if len(binStat) != 14:
-		   	#mismatch = mismatch + 1 
+		   	#mismatch = mismatch + 1
 		   #masks for the bins
 		   if binStat == "0b000000000000": #these are binary numbers
 		   	channelStat = 0 #zero type of status (OFF)
@@ -960,7 +963,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   	StatusMeaning = "ON"
 		   	#extensibleStat = extensibleStat + StatusMeaning + " "
 		   	#print(StatusMeaning)
-		
+
 		   cutBinStr = binStat[13:]
                    if cutBinStr == "0": #if I have OFF
                    	extensibleStat = extensibleStat + "OFF" + " "
@@ -972,11 +975,11 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   #I observe the bin number with bin(shift2)
 		   #I shift of one bit to delete the bit 0 from the string
 		   shift2 = binStat[:-1]
-		   
+
 		   #print("binStat:", binStat, "shift2:", shift2 )
 		   if len(shift2) != 13:
 		   	mismatch2 = mismatch2 + 1
-		   
+
 		   #for the second status cathegory I need the last two bins of shift2
 		   #print ( "shift2", shift2, "bin 1 and 2", shift2[11:])
 		   if int(shift2[11:]) > 0:
@@ -991,17 +994,17 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   		StatusMeaning = "RDW"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
-		   
-		   #third status 
-		   shift3 = binStat[:-3] 
+
+		   #third status
+		   shift3 = binStat[:-3]
 		   if len(shift3) != 11:
                         mismatch3 = mismatch3 + 1
-		   
+
 		   #print ( "shift3", shift3, "bin 3, 4, 5", shift3[8:])
 		   if int(shift3[8:]) > 0:
 		   	#print (shift3[8:])
-		   	#howMany345 = howMany345 + 1 
-		   	channelStat = 3 #third type of status  
+		   	#howMany345 = howMany345 + 1
+		   	channelStat = 3 #third type of status
 		   	cutBinStr = shift3[8:]
                         if cutBinStr[2] == "1": #if I have OVC
                                 StatusMeaning = "OVC"
@@ -1016,16 +1019,16 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
 
-		   #fourth status                                        
-                   shift4 = binStat[:-6] 
+		   #fourth status
+                   shift4 = binStat[:-6]
                    if len(shift4) != 8:
                         mismatch4 = mismatch4 + 1
-                   
+
                    #print ( "shift4", shift4, "bin 6, 7, 8, 9", shift4[4:])
                    if int(shift4[4:]) > 0:
                    	#print (shift4[4:])
-                   	howMany6789 = howMany6789 + 1 
-                   	channelStat = 4 #fourth type of status  
+                   	howMany6789 = howMany6789 + 1
+                   	channelStat = 4 #fourth type of status
 		   	cutBinStr = shift4[4:]
                         if cutBinStr[3] == "1": #if I have Ext Trip
                                 StatusMeaning = "Ext Trip"
@@ -1044,47 +1047,47 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
 
-		   #fifth status                                              
-                   shift5 = binStat[:-10] 
+		   #fifth status
+                   shift5 = binStat[:-10]
                    if len(shift5) != 4:
                         mismatch5 = mismatch5 + 1
-                   
+
                    #print ( "shift5", shift5, "bin 10", shift5[3:])
                    if int(shift5[3:]) > 0:
                    	#print (shift5[3:])
-                   	howMany10 = howMany10 + 1 
-                   	channelStat = 5 #fifth type of status  
+                   	howMany10 = howMany10 + 1
+                   	channelStat = 5 #fifth type of status
 		   	cutBinStr = shift5[3:]
                         if cutBinStr[0] == "1": #if I have Calib Error
                                 StatusMeaning = "Calib Error"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
 
-		   #sixth status                                              
-                   shift6 = binStat[:-11] 
+		   #sixth status
+                   shift6 = binStat[:-11]
                    if len(shift6) != 3:
                         mismatch6 = mismatch6 + 1
-                   
+
                    #print ( "shift6", shift6, "bin 11", shift6[2:])
                    if int(shift6[2:]) > 0:
                    	#print (shift6[2:])
-                   	howMany11 = howMany11 + 1 
-                   	channelStat = 6 #fifth type of status  
+                   	howMany11 = howMany11 + 1
+                   	channelStat = 6 #fifth type of status
                    	cutBinStr = shift6[2:]
                         if cutBinStr[0] == "1": #if I have Unplugged
                                 StatusMeaning = "Unplugged"
 		   		extensibleStat = extensibleStat + StatusMeaning + " "
 		   		#print(StatusMeaning)
-		   
+
 		   #list S and T for the tgraph status vs time (millisecond int)
 		   smonOnlyT.append(tot_secondsSmon)
 		   smonOnlyS.append(channelStat)
 		   smonDecimalStatus.append( decimalStatus )
 		   smonOnlyTDateString.append(str(currentTsSmon))
 		   smonOnlyMeaningStat.append(extensibleStat)
-		   
+
 		   smonOnlyTDate.append(4.) #an any float number
-                                                                                                        
+
                    #print currentTsVmon
                    year = str(currentTsSmon)[0:4]
                    #print year
@@ -1100,34 +1103,34 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                    #print second
                    micro = str(currentTsSmon)[20:]
                    #print micro
-                                                                                                       
+
                    #longString = ROOT.TString( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
                    longList = str( year+"-"+month+"-"+day+" "+hour+":"+minute+":"+second )
-                                                                                                       
+
                    da1 = ROOT.TDatime( longList )
-                                                                                                       
+
                    smonOnlyTDate[-1] = da1.Convert()
-                                                                                                                                                                
+
                    floatMicro = "0."+micro
                    #print floatMicro
                    smonOnlyTDate[contatoreS] = smonOnlyTDate[contatoreS] + float(floatMicro) #add microseconds to times (all ending with .0 because of Convert)
 
-		   
+
 		   #th1 for status
 		   #SmonTh1List[counter].Fill(channelStat)
 		   SmonTh1List[counter].Fill(decimalStatus)
-   
+
 		   SmonMeaning = ("StatChamber"+chamberList[indexB]+"_"+channelList[indexC], "time:"+str(result[0]), "Status:"+StatusMeaning )
 		   SmonMeaningList.append(SmonMeaning)
-		   
-		   
-		   contatoreS=contatoreS+1 
-	
+
+
+		   contatoreS=contatoreS+1
+
 		#print ("counter before S", counter)
-	
+
 		#th1 status
 		SmonTh1List[counter].Write()
-		
+
 		#tgraph status
 		if len(smonOnlyT) != len( smonOnlyS ):
 			print("!!!!!error tgraph status: filling with lists of different lenght!!!!!")
@@ -1152,7 +1155,7 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 		#print(SortList)
 		SortList = sorted(SortList, key=lambda element: element[0])
 		#print(SortList)
-		
+
 		for refill in range(len(smonOnlyT)):
 			smonOnlyT[refill]=SortList[refill][0]
 			smonOnlyS[refill]=SortList[refill][1]
@@ -1160,22 +1163,22 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			smonOnlyTDate[refill]=SortList[refill][3]
 			smonOnlyTDateString[refill]=SortList[refill][4]
 			smonDecimalStatus[refill] = SortList[refill][5]
-	
+
 		#print(smonOnlyT)
 		#print(smonOnlyS)
 		#print(SmonMeaningList)
-	
+
 
 		if (len(smonOnlyT))==0:
                 	print("smonOnlyT lenght", len(smonOnlyT))
                 	print("------------------------------------------------------------------")
                 	print("ERROR: there are no status data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
                 	print("------------------------------------------------------------------")
-                
-                	file = open("HVErr.log", "w") 
-                	file.write("ERROR: there are no status data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC]) 
-                	file.close() 
-                	
+
+                	file = open("HVErr.log", "w")
+                	file.write("ERROR: there are no status data for chamber "+ chamberList[indexB]+ " channel "+ channelList[indexC])
+                	file.close()
+
 			#counter = counter + 1
                 	#I put a anomalous status value if there is no data
 			smonOnlyT.append(0.)
@@ -1188,14 +1191,14 @@ for indexB in range(len(chamberList)): #loop on the selected boards
                 	#continue
 
 
-	
+
 		#rescale the negative times
 		negativeStart = smonOnlyT[0]
 		if smonOnlyT[0] < 0:
 			for iterTime in range(len(smonOnlyT)):
 				smonOnlyT[iterTime] = smonOnlyT[iterTime] + negativeStart*(-1)
 		#print(smonOnlyT)
-		
+
 		#Smontg1 = ROOT.TGraph(n,x,y); x and y is the name of arrays with numbers of time and V
                 #Smontg1 = ROOT.TGraph(len(smonOnlyT),smonOnlyTDate,smonOnlyS)
                 Smontg1 = ROOT.TGraph(len(smonOnlyT),smonOnlyTDate,smonDecimalStatus)
@@ -1221,22 +1224,22 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 
 		#List with all status
 		SmonMeaningListList.append(SmonMeaningList)
-		#print(SmonMeaningListList[counter])		
-		
+		#print(SmonMeaningListList[counter])
+
 		#tree for the status
-		StatusTree = ROOT.TTree("HV_StatusTree"+chamberList[indexB]+"_"+channelList[indexC], "HV_StatusTree"+chamberList[indexB]+"_"+channelList[indexC]) 
+		StatusTree = ROOT.TTree("HV_StatusTree"+chamberList[indexB]+"_"+channelList[indexC], "HV_StatusTree"+chamberList[indexB]+"_"+channelList[indexC])
 
 		smonRootTimes = ROOT.vector('float')()
 		smonRootTimesDate = ROOT.vector('string')()
 		smonRootDecimalStat = ROOT.vector('string')()
 		smonRootBinStat	= ROOT.vector('string')()
 		smonRootMeaningStat = ROOT.vector('string')()
-		
+
 		#StatusTree.Branch( 'TS', smonRootTimes )
-		StatusTree.Branch( 'TS', smonRootTimesDate )	
-		StatusTree.Branch( 'DecimalStat', smonRootDecimalStat )	
-		StatusTree.Branch( 'BinaryStat', smonRootBinStat )	
-		StatusTree.Branch( 'MeaningStat', smonRootMeaningStat )	
+		StatusTree.Branch( 'TS', smonRootTimesDate )
+		StatusTree.Branch( 'DecimalStat', smonRootDecimalStat )
+		StatusTree.Branch( 'BinaryStat', smonRootBinStat )
+		StatusTree.Branch( 'MeaningStat', smonRootMeaningStat )
 
 		for lungh in range(len( smonOnlyT )):
 			smonRootTimes.push_back( smonOnlyT[lungh] )
@@ -1246,9 +1249,9 @@ for indexB in range(len(chamberList)): #loop on the selected boards
 			smonRootMeaningStat.push_back( smonOnlyMeaningStat[lungh] )
 
 		StatusTree.Fill()
-		
+
 		StatusTree.Write()
-			
+
 		#FINAL COUNTER
 		counter = counter + 1
 
@@ -1262,5 +1265,3 @@ print("It is organised in directories: to change directory use DIRNAME->cd()")
 print('To draw a TH1 or a TGraph: OBJNAME->Draw()')
 print('To scan the root file use for example:\nHV_StatusTree2_2_Top_G3Bot->Scan("","","colsize=26")')
 print("ALL MONITOR TIMES ARE IN UTC, DCS TIMES ARE IN CET")
-
-
