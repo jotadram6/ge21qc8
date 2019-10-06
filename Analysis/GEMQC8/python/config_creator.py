@@ -49,8 +49,10 @@ def configMaker(run_number,masks):
 	outfile.write('trackResY = {}\n'.format(trackResY))
 	outfile.write('MulSigmaOnWindow = {}\n'.format(MulSigmaOnWindow))
 	outfile.write('minRecHitsPerTrack = {}\n'.format(minRecHitsPerTrack))
-	if (masks == "yesMasks") outfile.write('applyMasks = True\n')
-	if (masks == "noMasks") outfile.write('applyMasks = False\n')
+	if (masks == "yesMasks"):
+		outfile.write('applyMasks = True\n')
+	if (masks == "noMasks"):
+		outfile.write('applyMasks = False\n')
 
 	outfile.write('# Stand configuration definition\n')
 	StandConfiguration = ['0','0','0','0','0',\
