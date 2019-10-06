@@ -203,6 +203,7 @@ void macro_hot_dead_strips(int run, string configDir)
   TH2D *hotStrips2D[30];
   TH2D *deadStripsVFAT[30];
   TH2D *hotStripsVFAT[30];
+  TH2D *allMasksVFAT[30];
 
   for (int ch=0; ch<30; ch++)
   {
@@ -214,6 +215,8 @@ void macro_hot_dead_strips(int run, string configDir)
     deadStripsVFAT[ch] = new TH2D(name,"",3,0,3,8,-0.5,7.5);
     sprintf(name,"HotStripsVFAT_ch_%u",ch);
     hotStripsVFAT[ch] = new TH2D(name,"",3,0,3,8,-0.5,7.5);
+    sprintf(name,"AllMasksVFAT_ch_%u",ch);
+    allMasksVFAT[ch] = new TH2D(name,"",3,0,3,8,-0.5,7.5);
   }
 
   // Dead / Hot strips results in csv files
@@ -274,6 +277,7 @@ void macro_hot_dead_strips(int run, string configDir)
 		    	deadfile << entry;
           deadStrips2D[c]->Fill(strip,eta);
           deadStripsVFAT[c]->Fill(phi,eta);
+          allMasksVFAT[c]->Fill(phi,eta);
 		    	continue;
 		    }
 		    if (digi2D[c]->GetBinContent(strip+1,eta+1) > HotStripLimitValue[c])
@@ -282,11 +286,13 @@ void macro_hot_dead_strips(int run, string configDir)
 		    	hotfile << entry;
           hotStrips2D[c]->Fill(strip,eta);
           hotStripsVFAT[c]->Fill(phi,eta);
+          allMasksVFAT[c]->Fill(phi,eta);
 		    }
 		  }
 		}
-    deadStripsVFAT[c]->Scale(100/128);
-    hotStripsVFAT[c]->Scale(100/128);
+    deadStripsVFAT[c]->Scale(100.0/128.0);
+    hotStripsVFAT[c]->Scale(100.0/128.0);
+    allMasksVFAT[c]->Scale(100.0/128.0);
   }
 
   deadfile.close();
@@ -335,7 +341,7 @@ void macro_hot_dead_strips(int run, string configDir)
     deadStripsVFAT[c]->SetTitle(namename.c_str());
     deadStripsVFAT[c]->GetXaxis()->SetTitle("Strip Number");
     deadStripsVFAT[c]->GetYaxis()->SetTitle("ieta");
-    deadStripsVFAT[c]->Draw("colz");
+    deadStripsVFAT[c]->Draw("colz,text0");
     namename = "DeadStripsPerVFAT_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     deadStripsVFAT[c]->Write(namename.c_str());
     namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/DeadStripsPerVFAT_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
@@ -346,10 +352,21 @@ void macro_hot_dead_strips(int run, string configDir)
     hotStripsVFAT[c]->SetTitle(namename.c_str());
     hotStripsVFAT[c]->GetXaxis()->SetTitle("Strip Number");
     hotStripsVFAT[c]->GetYaxis()->SetTitle("ieta");
-    hotStripsVFAT[c]->Draw("colz");
+    hotStripsVFAT[c]->Draw("colz,text0");
     namename = "HotStripsPerVFAT_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     hotStripsVFAT[c]->Write(namename.c_str());
     namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/HotStripsPerVFAT_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+    Canvas->SaveAs(namename.c_str());
+    Canvas->Clear();
+
+    namename = "AllMasksVFAT_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
+    hotStripsVFAT[c]->SetTitle(namename.c_str());
+    hotStripsVFAT[c]->GetXaxis()->SetTitle("Strip Number");
+    hotStripsVFAT[c]->GetYaxis()->SetTitle("ieta");
+    hotStripsVFAT[c]->Draw("colz,text0");
+    namename = "AllMasksVFAT_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
+    hotStripsVFAT[c]->Write(namename.c_str());
+    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/AllMasksVFAT_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
     Canvas->Clear();
   }
