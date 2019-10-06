@@ -192,13 +192,15 @@ deadStripsFile = "Analysis/GEMQC8/data/DeadStripsTables/Mask_DeadStrips_run" + s
 # digi to reco
 process.load('RecoLocalMuon.GEMRecHit.gemRecHits_cfi')
 
+HotDeadMasking = runConfig.applyMasks
+
 process.gemRecHits = cms.EDProducer("GEMRecHitProducer",
                                     recAlgoConfig = cms.PSet(),
                                     recAlgo = cms.string('GEMRecHitStandardAlgo'),
                                     gemDigiLabel = cms.InputTag("muonGEMDigis"),
                                     maskFile = cms.FileInPath(hotStripsFile),
                                     deadFile = cms.FileInPath(deadStripsFile),
-                                    applyMasking = cms.bool(True)
+                                    applyMasking = cms.bool(HotDeadMasking)
                                     )
 
 # Get certified events from file

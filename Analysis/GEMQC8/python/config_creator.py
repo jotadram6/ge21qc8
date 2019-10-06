@@ -1,7 +1,7 @@
 import csv
 import os, sys, io
 
-def configMaker(run_number):
+def configMaker(run_number,masks):
 
 	minClusterSize = 1
 	maxClusterSize = 10
@@ -49,6 +49,8 @@ def configMaker(run_number):
 	outfile.write('trackResY = {}\n'.format(trackResY))
 	outfile.write('MulSigmaOnWindow = {}\n'.format(MulSigmaOnWindow))
 	outfile.write('minRecHitsPerTrack = {}\n'.format(minRecHitsPerTrack))
+	if (masks == "yesMasks") outfile.write('applyMasks = True\n')
+	if (masks == "noMasks") outfile.write('applyMasks = False\n')
 
 	outfile.write('# Stand configuration definition\n')
 	StandConfiguration = ['0','0','0','0','0',\

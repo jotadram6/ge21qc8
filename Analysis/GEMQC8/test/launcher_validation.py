@@ -15,6 +15,7 @@ if __name__ == '__main__':
     # Positional arguments
     parser.add_argument("run_number", type=int, help="Specify the run number")
     parser.add_argument("alignmentDone", type=str, choices=["noAlignment","yesAlignment"], help="Specify if there is alignment done or not")
+    parser.add_argument("hotdeadStripsMasking", type=str, choices=["noMasks","yesMasks"], help="Specify if there hot/dead strips masking has to be performed or not")
     args = parser.parse_args()
 
     # Different paths definition
@@ -68,7 +69,7 @@ if __name__ == '__main__':
         dumpDBtables.getConfigurationTable(args.run_number,startDateTime)
 
     # Generate configuration file
-    config_creator.configMaker(args.run_number)
+    config_creator.configMaker(args.run_number,args.hotdeadStripsMasking)
     time.sleep(1)
 
     # Generate geometry files
@@ -96,7 +97,7 @@ if __name__ == '__main__':
     time.sleep(1)
 
     #  # Creating folder outside the CMMSW release to put the output files and plots
-    outDirName = "Results_QC8_validation_run_"+str(args.run_number)
+    outDirName = "Results_QC8_validation_run_"+str(args.run_number)+"_"+str(args.hotdeadStripsMasking)
     #---# Remove old version if want to recreate
     if (os.path.exists(resDirPath+outDirName)):
         rmDirCommand = "rm -rf "+outDirName
