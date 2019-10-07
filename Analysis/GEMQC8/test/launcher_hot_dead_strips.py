@@ -72,7 +72,7 @@ if __name__ == '__main__':
         dumpDBtables.getConfigurationTable(args.run_number,startDateTime)
 
     # Generate configuration file
-    config_creator.configMaker(args.run_number)
+    config_creator.configMaker(args.run_number,"noMasks")
     time.sleep(1)
 
     # Generate geometry files

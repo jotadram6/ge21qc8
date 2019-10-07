@@ -24,7 +24,7 @@ if __name__ == '__main__':
     import geometry_files_creator
 
     # Generate configuration file
-    config_creator.configMaker(run_number)
+    config_creator.configMaker(args.run_number,"noMasks")
     time.sleep(1)
 
     # Generate geometry files
