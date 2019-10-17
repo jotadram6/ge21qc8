@@ -22,7 +22,7 @@ options.register("runNum",run_number,
                  VarParsing.VarParsing.varType.int,
                  "Run number")
 
-options.register("eventsPerJob",5000,
+options.register("eventsPerJob",1000000,
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.int,
                  "The number of events (in each file)")
@@ -184,14 +184,15 @@ process.simHcalUnsuppressedDigis = cms.EDAlias()
 process.simSiPixelDigis = cms.EDAlias()
 process.simSiStripDigis = cms.EDAlias()
 
-process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
-process.MuonServiceProxy.ServiceParameters.Propagators.append('StraightLinePropagator')
-
 # Validation - Get certified events from file
 pyhtonModulesPath = os.path.abspath("runGEMCosmicStand_sim.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
 sys.path.insert(1,pyhtonModulesPath)
 from readCertEvtsFromFile import GetCertifiedEvents
 certEvts = GetCertifiedEvents(run_number)
+
+# Reconstruction of muon track
+process.load('RecoMuon.TrackingTools.MuonServiceProxy_cff')
+process.MuonServiceProxy.ServiceParameters.Propagators.append('StraightLinePropagator')
 
 process.GEMCosmicMuonForQC8 = cms.EDProducer("GEMCosmicMuonForQC8",
                                              process.MuonServiceProxy,

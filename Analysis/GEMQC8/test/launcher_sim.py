@@ -8,7 +8,12 @@ import datetime
 
 if __name__ == '__main__':
 
-    run_number = sys.argv[1]
+    # Define the parser
+    import argparse
+    parser = argparse.ArgumentParser(description="QC8 simulation of muon track reconstruction and efficiency calculation. For any doubt: https://twiki.cern.ch/twiki/bin/view/CMS/GEMCosmicRayAnalysis")
+    # Positional arguments
+    parser.add_argument("run_number", type=int, help="Specify the run number")
+    args = parser.parse_args()
 
     # Different paths definition
     srcPath = os.path.abspath("launcher_sim.py").split('QC8Test')[0]+'QC8Test/src/'
