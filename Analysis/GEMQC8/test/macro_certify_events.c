@@ -3,6 +3,7 @@
 #include <TH3D.h>
 #include <TEfficiency.h>
 #include <TFile.h>
+#include <TDirectory.h>
 #include <TTree.h>
 #include "TGraphAsymmErrors.h"
 #include <TBranch.h>
@@ -148,6 +149,10 @@ void macro_certify_events(int run, string configDir)
   {
     int c = chamberPos[i];
 
+    namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + to_string(chamberNamePlot[i]);
+    infile->mkdir(namename);
+    infile->cd(namename);
+
     // Plotting number of digis per chamber vs evt
 
 		namename = "NdigisVsEvt_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
@@ -156,9 +161,9 @@ void macro_certify_events(int run, string configDir)
 		NdigisPerChVsEvt[c]->GetYaxis()->SetTitle("nDigis");
 		NdigisPerChVsEvt[c]->GetXaxis()->SetRangeUser(0,nTotEvents);
 		NdigisPerChVsEvt[c]->Draw();
-    namename = "NdigisVsEvt_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
+    namename = "NdigisVsEvt_" + to_string(chamberNamePlot[i]) + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		NdigisPerChVsEvt[c]->Write(namename.c_str());
-		namename = "NdigisVsEvt_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + to_string(chamberNamePlot[i]) + "/NdigisVsEvt_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 
 		// Plotting number of digis per chamber vs evt
@@ -168,9 +173,9 @@ void macro_certify_events(int run, string configDir)
 		NdigisPerChDistribution[c]->GetXaxis()->SetTitle("nDigis");
 		NdigisPerChDistribution[c]->GetYaxis()->SetTitle("Counts");
 		NdigisPerChDistribution[c]->Draw();
-    namename = "NdigisDistribution_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
+    namename = "NdigisDistribution_" + to_string(chamberNamePlot[i]) + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		NdigisPerChDistribution[c]->Write(namename.c_str());
-		namename = "NdigisDistribution_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + to_string(chamberNamePlot[i]) + "/NdigisDistribution_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 
 		// Plotting number of recHits per chamber vs evt
@@ -181,9 +186,9 @@ void macro_certify_events(int run, string configDir)
 		NrecHitsPerChVsEvt[c]->GetYaxis()->SetTitle("nRecHits");
 		NrecHitsPerChVsEvt[c]->GetXaxis()->SetRangeUser(0,nTotEvents);
 		NrecHitsPerChVsEvt[c]->Draw();
-    namename = "NrecHitsVsEvt_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
+    namename = "NrecHitsVsEvt_" + to_string(chamberNamePlot[i]) + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		NrecHitsPerChVsEvt[c]->Write(namename.c_str());
-		namename = "NrecHitsVsEvt_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + to_string(chamberNamePlot[i]) + "/NrecHitsVsEvt_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 
 		// Plotting number of recHits per chamber vs evt
@@ -193,9 +198,9 @@ void macro_certify_events(int run, string configDir)
 		NrecHitsPerChDistribution[c]->GetXaxis()->SetTitle("nRecHits");
 		NrecHitsPerChDistribution[c]->GetYaxis()->SetTitle("Counts");
 		NrecHitsPerChDistribution[c]->Draw();
-    namename = "NrecHitsDistribution_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
+    namename = "NrecHitsDistribution_" + to_string(chamberNamePlot[i]) + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		NrecHitsPerChDistribution[c]->Write(namename.c_str());
-		namename = "NrecHitsDistribution_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + to_string(chamberNamePlot[i]) + "/NrecHitsDistribution_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 
     // Here looking for events with tripped chamber
@@ -227,7 +232,8 @@ void macro_certify_events(int run, string configDir)
       }
     }
 
-		Canvas->Clear();
+    Canvas->Clear();
+    infile->cd();
   }
 
 	// csv file with certified events per chamber

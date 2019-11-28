@@ -23,7 +23,7 @@ if __name__ == '__main__':
     pyhtonModulesPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
     runPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
     dataPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/'
-    resDirPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0]
+    outDirPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + "Results_QC8_validation_run_"+str(args.run_number)
 
     sys.path.insert(0,pyhtonModulesPath)
 
@@ -96,27 +96,26 @@ if __name__ == '__main__':
     running.communicate()
     time.sleep(1)
 
-    #  # Creating folder outside the CMMSW release to put the output files and plots
-    outDirName = "Results_QC8_validation_run_"+str(args.run_number)+"_"+str(args.hotdeadStripsMasking)
+    # Creating folder outside the CMMSW release to put the output files and plots
     #---# Remove old version if want to recreate
-    if (os.path.exists(resDirPath+outDirName)):
-        rmDirCommand = "rm -rf "+outDirName
-        rmDir = subprocess.Popen(rmDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=resDirPath)
+    if (os.path.exists(outDirPath)):
+        rmDirCommand = "rm -rf "+outDirPath
+        rmDir = subprocess.Popen(rmDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True)
         rmDir.communicate()
     #---# Create the new empty folder
-    resDirCommand = "mkdir "+outDirName
-    resDir = subprocess.Popen(resDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=resDirPath)
+    resDirCommand = "mkdir "+outDirPath
+    resDir = subprocess.Popen(resDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True)
     resDir.communicate()
     time.sleep(1)
 
     # Create folders for ouput plots per chamber
     import configureRun_cfi as runConfig
     SuperChType = runConfig.StandConfiguration
-    effoutDir = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + outDirName
+    ChID = runConfig.ChamberIDs
     for i in range (0,30):
         if (SuperChType[int(i/2)] != '0'):
-            plotsDirCommand = "mkdir outPlots_Chamber_Pos_" + str(i)
-            plotsDirChamber = subprocess.Popen(plotsDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
+            plotsDirCommand = "mkdir outPlots_Chamber_Pos_" + str(i) + "_" + ChID[i]
+            plotsDirChamber = subprocess.Popen(plotsDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=outDirPath)
             plotsDirChamber.communicate()
     time.sleep(1)
 
@@ -126,17 +125,17 @@ if __name__ == '__main__':
         out_name = out_name + '0'
     out_name = out_name + str(args.run_number) + '.root'
 
-    mvToDirCommand = "mv validation_" + out_name + " " + resDirPath+outDirName + "/validation_" + out_name
+    mvToDirCommand = "mv validation_" + out_name + " " + outDirPath + "/validation_" + out_name
     movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
     movingToDir.communicate()
     time.sleep(1)
 
     # Efficiency computation & output
-    effCommand = "root -l -q -b " + runPath + "macro_validation.c(" + str(args.run_number) + ",\"" + dataPath + "\",\"" + startDateTime + "\")"
-    efficiency = subprocess.Popen(effCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=effoutDir)
-    while efficiency.poll() is None:
-        line = efficiency.stdout.readline()
+    rootMacroCommand = "root -l -q -b " + runPath + "macro_validation.c(" + str(args.run_number) + ",\"" + dataPath + "\",\"" + startDateTime + "\")"
+    rootMacroProcess = subprocess.Popen(rootMacroCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=outDirPath)
+    while rootMacroProcess.poll() is None:
+        line = rootMacroProcess.stdout.readline()
         print(line)
-    print efficiency.stdout.read()
-    efficiency.communicate()
+    print rootMacroProcess.stdout.read()
+    rootMacroProcess.communicate()
     time.sleep(1)

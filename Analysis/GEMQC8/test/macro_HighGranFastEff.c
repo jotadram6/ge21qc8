@@ -3,6 +3,7 @@
 #include <TH3D.h>
 #include <TEfficiency.h>
 #include <TFile.h>
+#include <TDirectory.h>
 #include <TTree.h>
 #include "TGraphAsymmErrors.h"
 #include <TBranch.h>
@@ -51,14 +52,15 @@ void macro_HighGranFastEff(int run, string configDir)
   string namename = "";
 
 	// Open stand configuration file for present run & get names + positions of chambers
+
 	string configName = configDir + "StandGeometryConfiguration_run" + to_string(run) + ".csv";
 	ifstream standConfigFile (configName);
 
 	string line, split, comma = ",", slash = "/";
-	vector<string> chamberName;
+	vector<string> chamberName, chamberNamePlot;
 	int ChPos = 0;
 	vector<int> chamberPos;
-	size_t pos = 0;
+	size_t pos = 0, pos_slash = 0;
 
 	if (standConfigFile.is_open())
 	{
@@ -68,6 +70,8 @@ void macro_HighGranFastEff(int run, string configDir)
 			split = line.substr(0, pos);
 			if (split == "CH_SERIAL_NUMBER") continue;
 			chamberName.push_back(split);
+			pos_slash = split.find(slash);
+			chamberNamePlot.push_back(split.substr(0,pos_slash)+split.substr(pos_slash+slash.length(),pos));
 			line.erase(0, pos + comma.length());
 
 			pos = line.find(comma);
@@ -99,7 +103,7 @@ void macro_HighGranFastEff(int run, string configDir)
 	TH3D *numblocks3D = (TH3D*)infile->Get("HighGranFastEffQC8/num_block");
 	TH3D *denomblocks3D = (TH3D*)infile->Get("HighGranFastEffQC8/denom_block");
 
-	//Get the 3D x position block histograms 
+	//Get the 3D x position block histograms
 	TH3D *numblocks3Dx = (TH3D*)infile->Get("HighGranFastEffQC8/num_block_x");
 	TH3D *denomblocks3Dx = (TH3D*)infile->Get("HighGranFastEffQC8/denom_block_x");
 
@@ -113,10 +117,10 @@ void macro_HighGranFastEff(int run, string configDir)
 	TH2D *Eff2DperVFATperCh[30];
 	TH2D *Eff2DxperVFATperCh[30];
 
-	int nstrips = 384;	
+	int nstrips = 384;
 	int stripsperblock = 8;
 	int nblocks = 0;
-	
+
 	nblocks = nstrips / stripsperblock;
 
 	//Overall efficiency per chamber
@@ -126,7 +130,7 @@ void macro_HighGranFastEff(int run, string configDir)
 	    double total_num   = numblocks3D->Integral(1,48,1,9,ch+1,ch+1);
 	    denomblocks1D->SetBinContent(ch+1, total_denom);
 	    numblocks1D->SetBinContent(ch+1, total_num);
-	}  
+	}
 
 	TGraphAsymmErrors *effblocks1Dch = new TGraphAsymmErrors;
 	effblocks1Dch->Divide(numblocks1D,denomblocks1D);
@@ -240,58 +244,50 @@ void macro_HighGranFastEff(int run, string configDir)
 
 	// Plot efficiency vs x pos of 4th strip of blocks of 8 strips for each chamber
 	for (unsigned int i=0; i<chamberPos.size(); i++)
-	 {
-	int c = chamberPos[i];
+	{
+		int c = chamberPos[i];
 
-	namename = "Efficiency_blocks_Trapezoid_HGFE_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
-	Eff2DxperBlockperCh[c]->SetTitle(namename.c_str());
-	Eff2DxperBlockperCh[c]->GetXaxis()->SetTitle("X position [cm]");
-	Eff2DxperBlockperCh[c]->GetYaxis()->SetTitle("Eta");
-	Eff2DxperBlockperCh[c]->SetStats(false);
-	Eff2DxperBlockperCh[c]->Draw("colz");
-	Eff2DxperBlockperCh[c]->Write(namename.c_str());
-	namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Efficiency_blocks_Trapezoid_HGFE_" + to_string(chamberPos[i]) + "_run_" + to_string(run) + ".png";
+		namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + to_string(chamberNamePlot[i]);
+    infile->mkdir(namename);
+    infile->cd(namename);
 
-	Canvas->SaveAs(namename.c_str());
-	Canvas->Clear();
-	}
+		namename = "Efficiency_blocks_Trapezoid_HGFE_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
+		Eff2DxperBlockperCh[c]->SetTitle(namename.c_str());
+		Eff2DxperBlockperCh[c]->GetXaxis()->SetTitle("X position [cm]");
+		Eff2DxperBlockperCh[c]->GetYaxis()->SetTitle("Eta");
+		Eff2DxperBlockperCh[c]->SetStats(false);
+		Eff2DxperBlockperCh[c]->Draw("colz");
+		Eff2DxperBlockperCh[c]->Write(namename.c_str());
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/Efficiency_blocks_Trapezoid_HGFE_" + to_string(chamberPos[i]) + "_run_" + to_string(run) + ".png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
 
-	// Plot efficiency per block of 8 strips for each chamber
-	for (unsigned int i=0; i<chamberPos.size(); i++)
-	 {
-	int c = chamberPos[i];
 
-	namename = "Efficiency_blocks_HGFE_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
-	Eff2DperBlockperCh[c]->SetTitle(namename.c_str());
-	Eff2DperBlockperCh[c]->GetXaxis()->SetTitle("Block");
-	Eff2DperBlockperCh[c]->GetYaxis()->SetTitle("Eta");
-	Eff2DperBlockperCh[c]->SetStats(false);
-	Eff2DperBlockperCh[c]->Draw("colz");
-	Eff2DperBlockperCh[c]->Write(namename.c_str());
-	namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Efficiency_blocks_HGFE_" + to_string(chamberPos[i]) + "_run_" + to_string(run) + ".png";
+		namename = "Efficiency_blocks_HGFE_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
+		Eff2DperBlockperCh[c]->SetTitle(namename.c_str());
+		Eff2DperBlockperCh[c]->GetXaxis()->SetTitle("Block");
+		Eff2DperBlockperCh[c]->GetYaxis()->SetTitle("Eta");
+		Eff2DperBlockperCh[c]->SetStats(false);
+		Eff2DperBlockperCh[c]->Draw("colz");
+		Eff2DperBlockperCh[c]->Write(namename.c_str());
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/Efficiency_blocks_HGFE_" + to_string(chamberPos[i]) + "_run_" + to_string(run) + ".png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
 
-	Canvas->SaveAs(namename.c_str());
-	Canvas->Clear();
-	}
 
-	// Plot efficiency per VFAT for each chamber
- 	for (unsigned int i=0; i<chamberPos.size(); i++)
- 	{
-	int c = chamberPos[i];
+		namename = "Efficiency_VFAT_HGFE_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
+		Eff2DperVFATperCh[c]->SetTitle(namename.c_str());
+		Eff2DperVFATperCh[c]->GetXaxis()->SetTitle("VFAT");
+		Eff2DperVFATperCh[c]->GetYaxis()->SetTitle("Eta");
+		Eff2DperVFATperCh[c]->SetStats(false);
+		Eff2DperVFATperCh[c]->Draw("colz,TEXT0");
+		Eff2DperVFATperCh[c]->Write(namename.c_str());
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/Efficiency_VFAT_HGFE_" + to_string(chamberPos[i]) + "_run_" + to_string(run) + ".png";
+		Canvas->SaveAs(namename.c_str());
+		Canvas->Clear();
 
-	namename = "Efficiency_VFAT_HGFE_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
-	Eff2DperVFATperCh[c]->SetTitle(namename.c_str());
-	Eff2DperVFATperCh[c]->GetXaxis()->SetTitle("VFAT");
-	Eff2DperVFATperCh[c]->GetYaxis()->SetTitle("Eta");
-	Eff2DperVFATperCh[c]->SetStats(false);
-	Eff2DperVFATperCh[c]->Draw("colz,TEXT0");
-	Eff2DperVFATperCh[c]->Write(namename.c_str());
-	namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Efficiency_VFAT_HGFE_" + to_string(chamberPos[i]) + "_run_" + to_string(run) + ".png";
-
-	Canvas->SaveAs(namename.c_str());
-	Canvas->Clear();
+		infile->cd();
 	}
 
   infile->Close();
-
 }

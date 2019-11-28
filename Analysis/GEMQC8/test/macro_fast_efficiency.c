@@ -3,6 +3,7 @@
 #include <TH3D.h>
 #include <TEfficiency.h>
 #include <TFile.h>
+#include <TDirectory.h>
 #include <TTree.h>
 #include "TGraphAsymmErrors.h"
 #include <TBranch.h>
@@ -360,6 +361,10 @@ void macro_fast_efficiency(int run, string configDir)
 
     outfile.close();
 
+		namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + to_string(chamberNamePlot[i]);
+    infile->mkdir(namename);
+    infile->cd(namename);
+
 		// Plotting clusterSize per chamber per eta
 
 		for (unsigned int eta=0; eta<8; eta++)
@@ -371,7 +376,7 @@ void macro_fast_efficiency(int run, string configDir)
 			clusterSize1D[c][eta]->Draw();
 			namename = "ClusterSize_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + "_run_" + to_string(run);
 			clusterSize1D[c][eta]->Write(namename.c_str());
-			namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/ClusterSize_Ch_Pos_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + ".png";
+			namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/ClusterSize_Ch_Pos_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + ".png";
 			Canvas->SaveAs(namename.c_str());
 			Canvas->Clear();
 		}
@@ -390,7 +395,7 @@ void macro_fast_efficiency(int run, string configDir)
 		NrecHitsPerChVsEvt[c]->Draw("colz");
 		namename = "NrecHitsVsEvt_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		NrecHitsPerChVsEvt[c]->Write(namename.c_str());
-		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/NrecHitsVsEvt_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/NrecHitsVsEvt_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
 
@@ -408,10 +413,13 @@ void macro_fast_efficiency(int run, string configDir)
 		occupacyConfHits2D[c]->Draw("colz");
 		namename = "OccupacyConfHit_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		occupacyConfHits2D[c]->Write(namename.c_str());
-		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/OccupacyConfHit_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/OccupacyConfHit_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
+
 		Canvas->Clear();
 		Canvas->SetLogz(0);
+
+		infile->cd();
   }
 
   standConfigFile.close();

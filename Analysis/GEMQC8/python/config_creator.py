@@ -21,8 +21,8 @@ def configMaker(run_number,masks):
 	with open(infileName) as infile:
 		for line in infile:
 			line = line.split('\n')[0]
-			SCtype = line.split(',')[0]
-			if (SCtype!='CH_SERIAL_NUMBER'):
+			ChID = line.split(',')[0]
+			if (ChID!='CH_SERIAL_NUMBER'):
 				if (int(line.split(',')[8])!=int(run_number)):
 					sys.exit('StandGeometryConfiguration file has something wrong: run rumber not matching...')
 
@@ -55,20 +55,24 @@ def configMaker(run_number,masks):
 		outfile.write('applyMasks = False\n')
 
 	outfile.write('# Stand configuration definition\n')
-	StandConfiguration = ['0','0','0','0','0',\
-	                      '0','0','0','0','0',\
-	                      '0','0','0','0','0']
+	StandConfiguration = ['0']*15
+	ChamberIDs = ['0']*30
 
 	with open(infileName) as infile:
 		for line in infile:
 			line = line.split('\n')[0]
-			SCtype = line.split(',')[0]
-			if (SCtype!='CH_SERIAL_NUMBER'):
+			ChID = line.split(',')[0]
+			if (ChID!='CH_SERIAL_NUMBER'):
 				position = line.split(',')[2]
 				row = int(position.split('/')[0])
 				column = int(position.split('/')[1])
+				TB = str(position.split('/')[2])
 				SCnumber = (5 * (column - 1)) + (row - 1)
-				StandConfiguration[SCnumber] = (SCtype)[8]
+				CHnumber = 2 * SCnumber # Good for the bottom, but if it's top, need to add 1
+				if (TB == "T"):
+					CHnumber += 1
+				StandConfiguration[SCnumber] = (ChID)[8] # Eight character in the chamber ID is "L" or "S"
+				ChamberIDs[CHnumber] = ChID.split('/')[0]+ChID.split('/')[1]
 
 	outfile.write('StandConfiguration = [\\\n')
 	for entry in range(15):
@@ -79,6 +83,17 @@ def configMaker(run_number,masks):
 		else:
 			outfile.write('\'' + StandConfiguration[entry] + '\',')
 
+	outfile.write('\n')
+
+	outfile.write('ChamberIDs = [\\\n')
+	for entry in range(30):
+		if (entry==9 or entry==19):
+			outfile.write('\'' + ChamberIDs[entry] + '\',\\\n')
+		elif (entry==29):
+			outfile.write('\'' + ChamberIDs[entry] + '\']')
+		else:
+			outfile.write('\'' + ChamberIDs[entry] + '\',')
+
 	outfile.close()
 
 	print("\n")
@@ -87,4 +102,5 @@ def configMaker(run_number,masks):
 
 if __name__ == '__main__':
 	run_num = sys.argv[1]
-	configMaker(run_num)
+	mask = sys.argv[2]
+	configMaker(run_num,mask)

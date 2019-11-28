@@ -3,6 +3,7 @@
 #include <TH3D.h>
 #include <TEfficiency.h>
 #include <TFile.h>
+#include <TDirectory.h>
 #include <TTree.h>
 #include "TGraphErrors.h"
 #include "TGraphAsymmErrors.h"
@@ -554,6 +555,10 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 	{
 		int c = chamberPos[i];
 
+		namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + to_string(chamberNamePlot[i]);
+    infile->mkdir(namename);
+    infile->cd(namename);
+
 		// Check to have meaningful plots, to prevent crashes
 
 		if (denom1D[c]->Integral() == 0) continue;
@@ -579,7 +584,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		num1D[c]->SetLineColor(kBlue);
 		num1D[c]->Draw("SAME");
 		num1D[c]->SetTitle(namename.c_str());
-		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Num_Denom_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/Num_Denom_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
 
@@ -599,7 +604,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		efficiencyPerChamber[c] = avgEffFit->GetParameter(0);
 		errorEfficiencyPerCh[c] = avgEffFit->GetParError(0);;
 		target97->Draw("SAME");
-		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Efficiency_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/Efficiency_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
 
@@ -653,7 +658,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 			clusterSize1D[c][eta]->Draw();
 			namename = "ClusterSize_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + "_run_" + to_string(run);
 			clusterSize1D[c][eta]->Write(namename.c_str());
-			namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/ClusterSize_Ch_Pos_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + ".png";
+			namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/ClusterSize_Ch_Pos_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + ".png";
 			Canvas->SaveAs(namename.c_str());
 			Canvas->Clear();
 		}
@@ -669,7 +674,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 			assocHitsClusterSize1D[c][eta]->Draw();
 			namename = "AssociatedHitsClusterSize_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + "_run_" + to_string(run);
 			assocHitsClusterSize1D[c][eta]->Write(namename.c_str());
-			namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/AssociatedHitsClusterSize_Ch_Pos_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + ".png";
+			namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/AssociatedHitsClusterSize_Ch_Pos_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + ".png";
 			Canvas->SaveAs(namename.c_str());
 			Canvas->Clear();
 		}
@@ -685,7 +690,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 			nonAssocHitsClusterSize1D[c][eta]->Draw();
 			namename = "NonAssociatedHitsClusterSize_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + "_run_" + to_string(run);
 			nonAssocHitsClusterSize1D[c][eta]->Write(namename.c_str());
-			namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/NonAssociatedHitsClusterSize_Ch_Pos_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + ".png";
+			namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/NonAssociatedHitsClusterSize_Ch_Pos_" + to_string(chamberPos[i]) + "_eta_" + to_string(eta+1) + ".png";
 			Canvas->SaveAs(namename.c_str());
 			Canvas->Clear();
 		}
@@ -704,7 +709,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		digi2D[c]->Draw("colz");
 		namename = "Digi_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		digi2D[c]->Write(namename.c_str());
-		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Digi_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/Digi_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
 		Canvas->SetLogz(0);
@@ -718,10 +723,11 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		nDigis[c]->Draw();
 		namename = "NumberOfDigis_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		nDigis[c]->Write(namename.c_str());
-		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/NumberOfDigis_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+		namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/NumberOfDigis_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
 		Canvas->SaveAs(namename.c_str());
 		Canvas->Clear();
 
+    infile->cd();
 	}
 
 	// Plots of recHits per layer

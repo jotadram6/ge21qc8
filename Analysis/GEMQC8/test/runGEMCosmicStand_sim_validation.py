@@ -246,7 +246,7 @@ process.ValidationQC8 = cms.EDProducer('ValidationQC8',
                                         )
 
 process.TFileService = cms.Service("TFileService",
-                                   fileName = cms.string('sim_'+strOutput)
+                                   fileName = cms.string('validation_'+strOutput)
                                    )
 
 process.rawDataCollector.RawCollectionList = cms.VInputTag(cms.InputTag("gemPacker"))

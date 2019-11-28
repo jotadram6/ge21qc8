@@ -3,6 +3,7 @@
 #include <TH3D.h>
 #include <TEfficiency.h>
 #include <TFile.h>
+#include <TDirectory.h>
 #include <TTree.h>
 #include "TGraphAsymmErrors.h"
 #include <TBranch.h>
@@ -190,7 +191,7 @@ void macro_hot_dead_strips(int run, string configDir)
 
     namename = "Digi_PerStrip_PerCh_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     digisPerStripPerCh[c]->Write(namename.c_str());
-    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Digi_PerStrip_PerCh_" + to_string(chamberPos[i]) + ".png";
+    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/Digi_PerStrip_PerCh_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
 
     delete GaussFit;
@@ -304,6 +305,10 @@ void macro_hot_dead_strips(int run, string configDir)
   {
     int c = chamberPos[i];
 
+    namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + to_string(chamberNamePlot[i]);
+    infile->mkdir(namename);
+    infile->cd(namename);
+
     namename = "Digi_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     digi2D[c]->SetTitle(namename.c_str());
     digi2D[c]->GetXaxis()->SetTitle("Strip Number");
@@ -311,7 +316,7 @@ void macro_hot_dead_strips(int run, string configDir)
     digi2D[c]->Draw("colz");
     namename = "Digi_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     digi2D[c]->Write(namename.c_str());
-    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/Digi_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/Digi_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
     Canvas->Clear();
 
@@ -322,7 +327,7 @@ void macro_hot_dead_strips(int run, string configDir)
     deadStrips2D[c]->Draw("colz");
     namename = "DeadStrips_2D_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     deadStrips2D[c]->Write(namename.c_str());
-    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/DeadStrips_2D_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/DeadStrips_2D_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
     Canvas->Clear();
 
@@ -333,7 +338,7 @@ void macro_hot_dead_strips(int run, string configDir)
     hotStrips2D[c]->Draw("colz");
     namename = "HotStrips_2D_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     hotStrips2D[c]->Write(namename.c_str());
-    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/HotStrips_2D_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/HotStrips_2D_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
     Canvas->Clear();
 
@@ -344,7 +349,7 @@ void macro_hot_dead_strips(int run, string configDir)
     deadStripsVFAT[c]->Draw("colz,text0");
     namename = "DeadStripsPerVFAT_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     deadStripsVFAT[c]->Write(namename.c_str());
-    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/DeadStripsPerVFAT_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/DeadStripsPerVFAT_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
     Canvas->Clear();
 
@@ -355,7 +360,7 @@ void macro_hot_dead_strips(int run, string configDir)
     hotStripsVFAT[c]->Draw("colz,text0");
     namename = "HotStripsPerVFAT_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     hotStripsVFAT[c]->Write(namename.c_str());
-    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/HotStripsPerVFAT_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/HotStripsPerVFAT_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
     Canvas->Clear();
 
@@ -366,9 +371,11 @@ void macro_hot_dead_strips(int run, string configDir)
     hotStripsVFAT[c]->Draw("colz,text0");
     namename = "AllMasksVFAT_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     hotStripsVFAT[c]->Write(namename.c_str());
-    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "/AllMasksVFAT_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
+    namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/AllMasksVFAT_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
     Canvas->Clear();
+
+    infile->cd();
   }
 
   standConfigFile.close();
