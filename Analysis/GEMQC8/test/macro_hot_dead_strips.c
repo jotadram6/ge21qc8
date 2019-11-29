@@ -158,10 +158,6 @@ void macro_hot_dead_strips(int run, string configDir)
   {
     int c = chamberPos[i];
 
-    namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + chamberNamePlot[i];
-    infile->mkdir(namename.c_str());
-    infile->cd(namename.c_str());
-
     namename = "Digi_PerStrip_PerCh_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     digisPerStripPerCh[c]->SetTitle(namename.c_str());
     digisPerStripPerCh[c]->GetXaxis()->SetTitle("digisPerStripPerCh");
@@ -193,15 +189,18 @@ void macro_hot_dead_strips(int run, string configDir)
     if ( (GaussFit->GetParameter(1) + nsigmas*GaussFit->GetParameter(2)) > 0 )
     	HotStripLimitValue[c] = int(GaussFit->GetParameter(1) + nsigmas*GaussFit->GetParameter(2)); // Centroid of the gaussian + n sigmas
 
+    namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + chamberNamePlot[i];
+    infile->mkdir(namename.c_str());
+    infile->cd(namename.c_str());
+
     namename = "Digi_PerStrip_PerCh_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     digisPerStripPerCh[c]->Write(namename.c_str());
     namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/Digi_PerStrip_PerCh_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
 
+    infile->cd();
     delete GaussFit;
     Canvas->Clear();
-
-    infile->cd();
   }
 
   // Dead / Hot strips in 2D digi-like and per VFAT plots
@@ -312,7 +311,6 @@ void macro_hot_dead_strips(int run, string configDir)
     int c = chamberPos[i];
 
     namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + chamberNamePlot[i];
-    infile->mkdir(namename.c_str());
     infile->cd(namename.c_str());
 
     namename = "Digi_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
