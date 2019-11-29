@@ -556,8 +556,8 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		int c = chamberPos[i];
 
 		namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + chamberNamePlot[i];
-    infile->mkdir(namename);
-    infile->cd(namename);
+    infile->mkdir(namename.c_str());
+    infile->cd(namename.c_str());
 
 		// Check to have meaningful plots, to prevent crashes
 

@@ -248,8 +248,8 @@ void macro_HighGranFastEff(int run, string configDir)
 		int c = chamberPos[i];
 
 		namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + chamberNamePlot[i];
-    infile->mkdir(namename);
-    infile->cd(namename);
+    infile->mkdir(namename.c_str());
+    infile->cd(namename.c_str());
 
 		namename = "Efficiency_blocks_Trapezoid_HGFE_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
 		Eff2DxperBlockperCh[c]->SetTitle(namename.c_str());

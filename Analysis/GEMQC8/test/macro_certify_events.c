@@ -150,8 +150,8 @@ void macro_certify_events(int run, string configDir)
     int c = chamberPos[i];
 
     namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + chamberNamePlot[i];
-    infile->mkdir(namename);
-    infile->cd(namename);
+    infile->mkdir(namename.c_str());
+    infile->cd(namename.c_str());
 
     // Plotting number of digis per chamber vs evt
 

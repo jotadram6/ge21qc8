@@ -158,6 +158,10 @@ void macro_hot_dead_strips(int run, string configDir)
   {
     int c = chamberPos[i];
 
+    namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + chamberNamePlot[i];
+    infile->mkdir(namename.c_str());
+    infile->cd(namename.c_str());
+
     namename = "Digi_PerStrip_PerCh_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     digisPerStripPerCh[c]->SetTitle(namename.c_str());
     digisPerStripPerCh[c]->GetXaxis()->SetTitle("digisPerStripPerCh");
@@ -196,6 +200,8 @@ void macro_hot_dead_strips(int run, string configDir)
 
     delete GaussFit;
     Canvas->Clear();
+
+    infile->cd();
   }
 
   // Dead / Hot strips in 2D digi-like and per VFAT plots
@@ -306,8 +312,8 @@ void macro_hot_dead_strips(int run, string configDir)
     int c = chamberPos[i];
 
     namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + chamberNamePlot[i];
-    infile->mkdir(namename);
-    infile->cd(namename);
+    infile->mkdir(namename.c_str());
+    infile->cd(namename.c_str());
 
     namename = "Digi_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
     digi2D[c]->SetTitle(namename.c_str());
@@ -365,12 +371,12 @@ void macro_hot_dead_strips(int run, string configDir)
     Canvas->Clear();
 
     namename = "AllMasksVFAT_" + chamberName[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
-    hotStripsVFAT[c]->SetTitle(namename.c_str());
-    hotStripsVFAT[c]->GetXaxis()->SetTitle("Strip Number");
-    hotStripsVFAT[c]->GetYaxis()->SetTitle("ieta");
-    hotStripsVFAT[c]->Draw("colz,text0");
+    allMasksVFAT[c]->SetTitle(namename.c_str());
+    allMasksVFAT[c]->GetXaxis()->SetTitle("Strip Number");
+    allMasksVFAT[c]->GetYaxis()->SetTitle("ieta");
+    allMasksVFAT[c]->Draw("colz,text0");
     namename = "AllMasksVFAT_" + chamberNamePlot[i] + "_in_position_" + to_string(chamberPos[i]) + "_run_" + to_string(run);
-    hotStripsVFAT[c]->Write(namename.c_str());
+    allMasksVFAT[c]->Write(namename.c_str());
     namename = "outPlots_Chamber_Pos_" + to_string(chamberPos[i]) + "_" + chamberNamePlot[i] + "/AllMasksVFAT_Ch_Pos_" + to_string(chamberPos[i]) + ".png";
     Canvas->SaveAs(namename.c_str());
     Canvas->Clear();
