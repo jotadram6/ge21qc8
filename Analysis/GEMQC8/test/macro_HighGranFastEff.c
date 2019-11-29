@@ -247,7 +247,7 @@ void macro_HighGranFastEff(int run, string configDir)
 	{
 		int c = chamberPos[i];
 
-		namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + to_string(chamberNamePlot[i]);
+		namename = "Pos_" + to_string(chamberPos[i]) + "_Chamber_" + chamberNamePlot[i];
     infile->mkdir(namename);
     infile->cd(namename);
 
