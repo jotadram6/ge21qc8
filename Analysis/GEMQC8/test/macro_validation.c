@@ -319,9 +319,12 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 			sprintf(name,"clusterSize_ch_%u_eta_%u",ch,(eta+1));
 			clusterSize1D[ch][eta] = new TH1D(name,"",20,0,20);
 
-			for (int cls=0; cls<20; cls++)
+			for (int phi=0; phi<3; phi++)
 			{
-				clusterSize1D[ch][eta]->SetBinContent((cls+1),clusterSize3D->GetBinContent(ch+1,eta+1,cls+1));
+				for (int cls=0; cls<20; cls++)
+				{
+					clusterSize1D[ch][eta]->SetBinContent((cls+1),clusterSize1D[ch][eta]->GetBinContent(cls+1)+clusterSize3D->GetBinContent(ch+1,(8*phi+(7-eta)+1),cls+1));
+				}
 			}
 		}
 	}
@@ -341,9 +344,12 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 			sprintf(name,"assocHitsClusterSize_ch_%u_eta_%u",ch,(eta+1));
 			assocHitsClusterSize1D[ch][eta] = new TH1D(name,"",20,0,20);
 
-			for (int cls=0; cls<20; cls++)
+			for (int phi=0; phi<3; phi++)
 			{
-				assocHitsClusterSize1D[ch][eta]->SetBinContent((cls+1),assocHitsClusterSize3D->GetBinContent(ch+1,eta+1,cls+1));
+				for (int cls=0; cls<20; cls++)
+				{
+					assocHitsClusterSize1D[ch][eta]->SetBinContent((cls+1),assocHitsClusterSize1D[ch][eta]->GetBinContent(cls+1)+assocHitsClusterSize3D->GetBinContent(ch+1,(8*phi+(7-eta)+1),cls+1));
+				}
 			}
 		}
 	}
@@ -363,9 +369,12 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 			sprintf(name,"nonAssocHitsClusterSize_ch_%u_eta_%u",ch,(eta+1));
 			nonAssocHitsClusterSize1D[ch][eta] = new TH1D(name,"",20,0,20);
 
-			for (int cls=0; cls<20; cls++)
+			for (int phi=0; phi<3; phi++)
 			{
-				nonAssocHitsClusterSize1D[ch][eta]->SetBinContent((cls+1),nonAssocHitsClusterSize3D->GetBinContent(ch+1,eta+1,cls+1));
+				for (int cls=0; cls<20; cls++)
+				{
+					nonAssocHitsClusterSize1D[ch][eta]->SetBinContent((cls+1),nonAssocHitsClusterSize3D[ch][eta]->GetBinContent(cls+1)+nonAssocHitsClusterSize3D->GetBinContent(ch+1,(8*phi+(7-eta)+1),cls+1));
+				}
 			}
 		}
 	}

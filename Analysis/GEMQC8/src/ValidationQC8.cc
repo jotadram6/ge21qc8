@@ -47,9 +47,9 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   denom2DPerLayer = fs->make<TH3D>("denom2DPerLayer","Denominator per layer",600,-100,100,8,0,8,10,0,10);
   recHitsPerEvt = fs->make<TH1D>("recHitsPerEvt","recHits per event",1000,0,1000);
   nonAssRecHitsPerEvt = fs->make<TH2D>("nonAssRecHitsPerEvt","Non associated recHits per event",30,0,30,100,0,100);
-  clusterSize = fs->make<TH3D>("clusterSize","clusterSize per chamber per eta partition",30,0,30,8,0,8,20,0,20);
-  associatedHitsClusterSize = fs->make<TH3D>("associatedHitsClusterSize","clusterSize of associated hits per chamber per eta partition",30,0,30,8,0,8,20,0,20);
-  nonAssociatedHitsClusterSize = fs->make<TH3D>("nonAssociatedHitsClusterSize","clusterSize of non associated hits per chamber per eta partition",30,0,30,8,0,8,20,0,20);
+  clusterSize = fs->make<TH3D>("clusterSize","clusterSize per chamber per eta partition",30,0,30,24,0,24,20,0,20);
+  associatedHitsClusterSize = fs->make<TH3D>("associatedHitsClusterSize","clusterSize of associated hits per chamber per eta partition",30,0,30,24,0,24,20,0,20);
+  nonAssociatedHitsClusterSize = fs->make<TH3D>("nonAssociatedHitsClusterSize","clusterSize of non associated hits per chamber per eta partition",30,0,30,24,0,24,20,0,20);
   residualPhi = fs->make<TH1D>("residualPhi","residualPhi",400,-5,5);
   residualEta = fs->make<TH1D>("residualEta","residualEta",200,-10,10);
   recHitsPerTrack = fs->make<TH1D>("recHitsPerTrack","recHits per reconstructed track",15,0,15);
@@ -101,7 +101,6 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
     genTree->Branch("genMuX",&genMuX,"genMuX/F");
     genTree->Branch("genMuY",&genMuY,"genMuY/F");
     genTree->Branch("genMuZ",&genMuZ,"genMuZ/F");
-    ///???
     genTree->Branch("genAngX",&genAngX,"genAngX/F");
     genTree->Branch("genAngY",&genAngY,"genAngY/F");
   }
@@ -300,12 +299,36 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
   for ( GEMRecHitCollection::const_iterator rechit = gemRecHits->begin(); rechit != gemRecHits->end(); ++rechit )
   {
-		// calculation of chamber id
-		GEMDetId hitID((*rechit).rawId());
-		int chIdRecHit = hitID.chamberId().chamber() + hitID.chamberId().layer() - 2;
+  	// calculation of chamber id
+  	GEMDetId hitID((*rechit).rawId());
+  	int chIdRecHit = hitID.chamberId().chamber() + hitID.chamberId().layer() - 2;
 
-		// cluster size plot and selection
-    clusterSize->Fill(chIdRecHit,hitID.roll()-1,(*rechit).clusterSize());
+  	// cluster size plot per VFAT
+    int rhEta = hitID.roll();
+
+    GEMChamber ch = gemChambers[0];
+    GEMChamber chHit = gemChambers[0];
+
+  	for(int c=0; c<n_ch;c++)
+    {
+      ch = gemChambers[c];
+      if (ch.id().chamber()+ch.id().layer()-2 == chIdRecHit)
+      {
+      	chHit = ch;
+      	break;
+      }
+    }
+
+    int n_strip = chHit.etaPartition(rhEta)->nstrips();
+    double min_x = chHit.etaPartition(rhEta)->centreOfStrip(0).x();
+    double max_x = chHit.etaPartition(rhEta)->centreOfStrip(n_strip-1).x();
+
+    Local3DPoint rhLP = rechit->localPosition();
+    int rhPhi = findVFAT(rhLP.x(), min_x, max_x);
+
+    clusterSize->Fill(chIdRecHit,8-rhEta+8*(rhPhi-1),(*rechit).clusterSize());
+
+    // cluster size selection
     if ((*rechit).clusterSize()<minCLS) continue;
     if ((*rechit).clusterSize()>maxCLS) continue;
 
@@ -519,13 +542,13 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
           int vfat = findVFAT(tlp.x(), min_x, max_x);
 
           bool validEvent = true;
-    	  for (unsigned int i = 0; i < beginTripEvt[index].size(); i++)
+      	  for (unsigned int i = 0; i < beginTripEvt[index].size(); i++)
       	  {
-    		if (beginTripEvt[index].at(i) <= nev && nev <= endTripEvt[index].at(i))
-    		{
-    		  validEvent = false;
-    		}
-    	  }
+            if (beginTripEvt[index].at(i) <= nev && nev <= endTripEvt[index].at(i))
+        		{
+        		  validEvent = false;
+        		}
+      	  }
 
           if (validEvent)
           {
@@ -569,7 +592,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
               confTestHitZ[index] = tempHitGP.z();
 
               n_roll = ch.nEtaPartitions();
-        	  minDeltaY = 50.;
+        	    minDeltaY = 50.;
               int hitRoll = -1;
               for (int r=0; r<n_roll; r++)
               {
@@ -583,12 +606,12 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
               }
 
               int n_strip = ch.etaPartition(hitRoll)->nstrips();
-        	  double min_x = ch.etaPartition(hitRoll)->centreOfStrip(0).x();
-        	  double max_x = ch.etaPartition(hitRoll)->centreOfStrip(n_strip-1).x();
+          	  double min_x = ch.etaPartition(hitRoll)->centreOfStrip(0).x();
+          	  double max_x = ch.etaPartition(hitRoll)->centreOfStrip(n_strip-1).x();
 
-        	  Local3DPoint tempHitLP = tmpRecHit->localPosition();
+          	  Local3DPoint tempHitLP = tmpRecHit->localPosition();
 
-        	  int hitVFAT = findVFAT(tempHitLP.x(), min_x, max_x);
+          	  int hitVFAT = findVFAT(tempHitLP.x(), min_x, max_x);
 
               hitsVFATdenom->Fill(hitVFAT-1,hitRoll-1,index);
               denom2DPerLayer->Fill(tempHitGP.x(),hitRoll-1,index%10);
@@ -608,22 +631,27 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
               associatedHits2DPerLayer->Fill(tempHitGP.x(),etaConfHit,chConfHit%10);
 
+              // to find the (non) associated hits cluster size, need to match tempHit with corresponding recHit, since tempHit (being a trackHit) has no info about it
+
               for ( GEMRecHitCollection::const_iterator rechit = gemRecHits->begin(); rechit != gemRecHits->end(); ++rechit )
               {
                 GEMDetId recHitID((*rechit).rawId());
                 int recHitCh = recHitID.chamber()+recHitID.layer()-2;
-                int recHitEta = recHitID.roll()-1;
-                GlobalPoint rechitGP = GEMGeometry_->idToDet((*rechit).gemId())->surface().toGlobal(rechit->localPosition());
 
-                if (fabs(rechitGP.x()-tempHitGP.x())<0.01 && fabs(rechitGP.y()-tempHitGP.y())<0.01 && recHitCh==chConfHit)
+                if (recHitCh==chConfHit)
                 {
-                  associatedHitsClusterSize->Fill(recHitCh,recHitEta,(*rechit).clusterSize());
-                }
-                else if (fabs(rechitGP.x()-tempHitGP.x())>1.0 && fabs(rechitGP.y()-tempHitGP.y())>1.0 && recHitCh==chConfHit)
-                {
-                  nonAssociatedHitsClusterSize->Fill(recHitCh,recHitEta,(*rechit).clusterSize());
-                  nonAssociatedHits2DPerLayer->Fill(rechitGP.x(),recHitEta,recHitCh%10);
-                  nOfNonAssHits[recHitCh]++;
+                  GlobalPoint rechitGP = GEMGeometry_->idToDet((*rechit).gemId())->surface().toGlobal(rechit->localPosition());
+
+                  if (fabs(rechitGP.x()-tempHitGP.x())<0.01 && fabs(rechitGP.y()-tempHitGP.y())<0.01)
+                  {
+                    associatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitVFAT-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
+                  }
+                  else if (fabs(rechitGP.x()-tempHitGP.x())>1.0 && fabs(rechitGP.y()-tempHitGP.y())>1.0)
+                  {
+                    nonAssociatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitVFAT-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
+                    nonAssociatedHits2DPerLayer->Fill(rechitGP.x(),hitRoll-1,recHitCh%10);
+                    nOfNonAssHits[recHitCh]++;
+                  }
                 }
               }
             }
@@ -635,7 +663,6 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
             nonAssRecHitsPerEvt->Fill(index,nOfNonAssHits[index]);
           }
         }
-        continue;
       }
     }
   }

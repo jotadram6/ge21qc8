@@ -23,7 +23,7 @@ if __name__ == '__main__':
     pyhtonModulesPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
     runPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
     dataPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/'
-    outDirPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + "Results_QC8_validation_run_"+str(args.run_number)
+    outDirPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + "Results_QC8_validation_run_"+str(args.run_number)+"_"+str(args.hotdeadStripsMasking)
 
     sys.path.insert(0,pyhtonModulesPath)
 
