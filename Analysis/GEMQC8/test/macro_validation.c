@@ -373,7 +373,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 			{
 				for (int cls=0; cls<20; cls++)
 				{
-					nonAssocHitsClusterSize1D[ch][eta]->SetBinContent((cls+1),nonAssocHitsClusterSize3D[ch][eta]->GetBinContent(cls+1)+nonAssocHitsClusterSize3D->GetBinContent(ch+1,(8*phi+(7-eta)+1),cls+1));
+					nonAssocHitsClusterSize1D[ch][eta]->SetBinContent((cls+1),nonAssocHitsClusterSize1D[ch][eta]->GetBinContent(cls+1)+nonAssocHitsClusterSize3D->GetBinContent(ch+1,(8*phi+(7-eta)+1),cls+1));
 				}
 			}
 		}
