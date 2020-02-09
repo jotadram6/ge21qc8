@@ -333,12 +333,15 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 
 	TH3D *assocHitsClusterSize3D = (TH3D*)infile->Get("ValidationQC8/associatedHitsClusterSize");
 
-	// Associated hits cluster size plots per chamber and per eta partition
+	// Associated hits cluster size plots per chamber and per eta partition / per VFAT
 
 	TH1D *assocHitsClusterSize1D[30][8];
+	TH1D *assocHitsClusterSizePerVFAT[30][24];
 
 	for (unsigned int ch=0; ch<30; ch++)
 	{
+		// Per eta partition
+
 		for (unsigned int eta=0; eta<8; eta++)
 		{
 			sprintf(name,"assocHitsClusterSize_ch_%u_eta_%u",ch,(eta+1));
@@ -350,6 +353,18 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 				{
 					assocHitsClusterSize1D[ch][eta]->SetBinContent((cls+1),assocHitsClusterSize1D[ch][eta]->GetBinContent(cls+1)+assocHitsClusterSize3D->GetBinContent(ch+1,(8*phi+(7-eta)+1),cls+1));
 				}
+			}
+		}
+
+		// Per VFAT
+
+		for (unsigned int vfat=0; vfat<24; vfat++)
+		{
+			sprintf(name,"assocHitsClusterSize_ch_%u_vfat_%u",ch,vfat);
+			assocHitsClusterSizePerVFAT[ch][vfat] = new TH1D(name,"",20,0,20);
+			for (int cls=0; cls<20; cls++)
+			{
+				assocHitsClusterSizePerVFAT[ch][vfat]->SetBinContent((cls+1),assocHitsClusterSize3D->GetBinContent(ch+1,vfat+1,cls+1));
 			}
 		}
 	}
@@ -648,9 +663,8 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 	    }
 			eff_value = eff1D[c]->GetY()[pointIndex];
 			error_value = (eff1D[c]->GetEYhigh()[pointIndex] + eff1D[c]->GetEYlow()[pointIndex]) / 2.0;
-			int eta_partition = 7 - (vfat % 8);
-			double cls_mean = assocHitsClusterSize1D[c][eta_partition]->GetMean();
-			double cls_sigma = assocHitsClusterSize1D[c][eta_partition]->GetStdDev();
+			double cls_mean = assocHitsClusterSizePerVFAT[c][vfat]->GetMean();
+			double cls_sigma = assocHitsClusterSizePerVFAT[c][vfat]->GetStdDev();
 			entry = to_string(vfat) + "," + to_string(eff_value) + "," + to_string(error_value) + "," + to_string(cls_mean) + "," + to_string(cls_sigma) + "," + to_string(deadStrips[c][vfat]/128.0*100.0) + "\n";
 			outfile << entry;
 		}
