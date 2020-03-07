@@ -82,6 +82,9 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("testTrajHitX",&testTrajHitX,"testTrajHitX[30]/F");
   tree->Branch("testTrajHitY",&testTrajHitY,"testTrajHitY[30]/F");
   tree->Branch("testTrajHitZ",&testTrajHitZ,"testTrajHitZ[30]/F");
+  tree->Branch("testTrajHitXerr",&testTrajHitX,"testTrajHitXerr[30]/F");
+  tree->Branch("testTrajHitYerr",&testTrajHitY,"testTrajHitYerr[30]/F");
+  tree->Branch("testTrajHitZerr",&testTrajHitZ,"testTrajHitZerr[30]/F");
   tree->Branch("confTestHitX",&confTestHitX,"confTestHitX[30]/F");
   tree->Branch("confTestHitY",&confTestHitY,"confTestHitY[30]/F");
   tree->Branch("confTestHitZ",&confTestHitZ,"confTestHitZ[30]/F");
@@ -555,6 +558,9 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
             testTrajHitX[index] = gtrp.x();
             testTrajHitY[index] = gtrp.y();
             testTrajHitZ[index] = gtrp.z();
+            testTrajHitXerr[index] = sqrt(tsosCurrent.freeTrajectoryState()->cartesianError().matrix()(0,0));
+            testTrajHitXerr[index] = sqrt(tsosCurrent.freeTrajectoryState()->cartesianError().matrix()(1,1));
+            testTrajHitXerr[index] = sqrt(tsosCurrent.freeTrajectoryState()->cartesianError().matrix()(2,2));
 
             g_nNumTrajHit++;
             nTrajHit++;
