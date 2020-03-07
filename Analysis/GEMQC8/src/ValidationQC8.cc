@@ -555,6 +555,9 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
             testTrajHitX[index] = gtrp.x();
             testTrajHitY[index] = gtrp.y();
             testTrajHitZ[index] = gtrp.z();
+            testTrajHitXerr[index] = sqrt(tsosCurrent.freeTrajectoryState()->cartesianError().matrix()(0,0));
+            testTrajHitXerr[index] = sqrt(tsosCurrent.freeTrajectoryState()->cartesianError().matrix()(1,1));
+            testTrajHitXerr[index] = sqrt(tsosCurrent.freeTrajectoryState()->cartesianError().matrix()(2,2));
 
             g_nNumTrajHit++;
             nTrajHit++;

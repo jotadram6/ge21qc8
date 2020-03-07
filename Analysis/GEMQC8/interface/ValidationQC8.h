@@ -131,6 +131,9 @@ private:
   float testTrajHitX[30];
   float testTrajHitY[30];
   float testTrajHitZ[30];
+  float testTrajHitXerr[30];
+  float testTrajHitYerr[30];
+  float testTrajHitZerr[30];
   float confTestHitX[30];
   float confTestHitY[30];
   float confTestHitZ[30];
