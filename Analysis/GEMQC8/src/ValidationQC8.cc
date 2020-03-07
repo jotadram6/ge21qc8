@@ -82,9 +82,9 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("testTrajHitX",&testTrajHitX,"testTrajHitX[30]/F");
   tree->Branch("testTrajHitY",&testTrajHitY,"testTrajHitY[30]/F");
   tree->Branch("testTrajHitZ",&testTrajHitZ,"testTrajHitZ[30]/F");
-  tree->Branch("testTrajHitXerr",&testTrajHitX,"testTrajHitXerr[30]/F");
-  tree->Branch("testTrajHitYerr",&testTrajHitY,"testTrajHitYerr[30]/F");
-  tree->Branch("testTrajHitZerr",&testTrajHitZ,"testTrajHitZerr[30]/F");
+  tree->Branch("testTrajHitXerr",&testTrajHitXerr,"testTrajHitXerr[30]/F");
+  tree->Branch("testTrajHitYerr",&testTrajHitYerr,"testTrajHitYerr[30]/F");
+  tree->Branch("testTrajHitZerr",&testTrajHitZerr,"testTrajHitZerr[30]/F");
   tree->Branch("confTestHitX",&confTestHitX,"confTestHitX[30]/F");
   tree->Branch("confTestHitY",&confTestHitY,"confTestHitY[30]/F");
   tree->Branch("confTestHitZ",&confTestHitZ,"confTestHitZ[30]/F");
@@ -220,6 +220,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     nDigisPerCh[i] = 0;
     nOfNonAssHits[i] = 0;
     testTrajHitX[i] = testTrajHitY[i] = testTrajHitZ[i] = -999.9;
+    testTrajHitXerr[i] = testTrajHitYerr[i] = testTrajHitZerr[i] = -999.9;
     confTestHitX[i] = confTestHitY[i] = confTestHitZ[i] = -999.9;
   }
 
