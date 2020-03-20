@@ -131,6 +131,7 @@ private:
   float confTestHitX[30];
   float confTestHitY[30];
   float confTestHitZ[30];
+  int confTestHitClSize[30];
 
   TTree *genTree;
   float genMuPx[30];

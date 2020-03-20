@@ -75,7 +75,7 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("trajPx",&trajPx,"trajPx[30]/F");
   tree->Branch("trajPy",&trajPy,"trajPy[30]/F");
   tree->Branch("trajPz",&trajPz,"trajPz[30]/F");
-  tree->Branch("nTraj",&nTraj,"nTraj[30]/I");
+  tree->Branch("nRecHitsTraj",&nRecHitsTraj,"nRecHitsTraj[30]/I");
   tree->Branch("testTrajHitX",&testTrajHitX,"testTrajHitX[30]/F");
   tree->Branch("testTrajHitY",&testTrajHitY,"testTrajHitY[30]/F");
   tree->Branch("testTrajHitZ",&testTrajHitZ,"testTrajHitZ[30]/F");
@@ -85,6 +85,8 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("confTestHitX",&confTestHitX,"confTestHitX[30]/F");
   tree->Branch("confTestHitY",&confTestHitY,"confTestHitY[30]/F");
   tree->Branch("confTestHitZ",&confTestHitZ,"confTestHitZ[30]/F");
+  tree->Branch("confTestHitClSize",&confTestHitClSize,"confTestHitClSize[30]/I");
+
 
   if (isMC)
   {
@@ -636,6 +638,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
                   if (fabs(rechitGP.x()-tempHitGP.x())<0.01 && fabs(rechitGP.y()-tempHitGP.y())<0.01)
                   {
                     associatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitVFAT-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
+                    confTestHitClSize[recHitCh] = (*rechit).clusterSize();
                   }
                   else if (fabs(rechitGP.x()-tempHitGP.x())>maxRes && fabs(rechitGP.y()-tempHitGP.y())>1.0)
                   {
