@@ -466,9 +466,6 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
     // Extrapolation to all the chambers, test chamber selected for efficiency calculation
 
-    nTrajHit = 0;
-    nTrajRecHit = 0;
-
     for(int c=0; c<n_ch;c++)
     {
       GEMChamber ch = gemChambers[c];
@@ -553,7 +550,6 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
             testTrajHitZerr[index] = sqrt(tsosCurrent.freeTrajectoryState()->cartesianError().matrix()(2,2));
 
             g_nNumTrajHit++;
-            nTrajHit++;
 
             // Check if there's a matching recHit in the test chamber (tmpRecHit)
 
@@ -615,7 +611,6 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
               hitsVFATnum->Fill(hitVFAT-1,hitRoll-1,index);
               num2DPerLayer->Fill(tempHitGP.x(),hitRoll-1,index%10);
 
-              nTrajRecHit++;
               g_nNumMatched++;
 
               residualPhi->Fill(tempHitGP.x()-gtrp.x());
