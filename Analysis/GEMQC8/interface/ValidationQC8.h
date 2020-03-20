@@ -107,27 +107,21 @@ private:
   TH1D *genMuAngY;
   TH1D *trajMuAngX;
   TH1D *trajMuAngY;
-  TH1D *deltaMuAngX;
-  TH1D *deltaMuAngY;
 
   TTree *tree;
   int run;
   int lumi;
   int nev;
-  double t_begin;
-  double t_end;
-  int nDigisPerCh[30];
-  int nOfNonAssHits[30];
-  int nrecHit;
   int nTraj;
-  float trajTheta;
-  float trajPhi;
-  float trajX;
-  float trajY;
-  float trajZ;
-  float trajPx;
-  float trajPy;
-  float trajPz;
+  float trajPhi[30];
+  float trajTheta[30];
+  float trajX[30];
+  float trajY[30];
+  float trajZ[30];
+  float trajPx[30];
+  float trajPy[30];
+  float trajPz[30];
+  int nRecHitsTraj[30];
   float testTrajHitX[30];
   float testTrajHitY[30];
   float testTrajHitZ[30];
@@ -137,23 +131,26 @@ private:
   float confTestHitX[30];
   float confTestHitY[30];
   float confTestHitZ[30];
-  int nTrajHit; // number of trajHits
-  int nTrajRecHit; // number of confirmed trajHits
-  float trajAngX;
-  float trajAngY;
 
   TTree *genTree;
-  float genMuPx;
-  float genMuPy;
-  float genMuPz;
-  float genMuPt;
-  float genMuTheta;
-  float genMuPhi;
-  float genMuX;
-  float genMuY;
-  float genMuZ;
-  float genAngX;
-  float genAngY;
+  float genMuPx[30];
+  float genMuPy[30];
+  float genMuPz[30];
+  float genMuPt[30];
+  float genMuPhi[30];
+  float genMuTheta[30];
+  float genMuX[30];
+  float genMuY[30];
+  float genMuZ[30];
+  float genAngX[30];
+  float genAngY[30];
+
+  // Not in trees
+  double t_begin;
+  double t_end;
+  int nrecHit;
+  int nDigisPerCh[30];
+  int nOfNonAssHits[30];
 };
 
 #endif

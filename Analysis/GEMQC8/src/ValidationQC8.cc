@@ -51,18 +51,13 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   associatedHitsClusterSize = fs->make<TH3D>("associatedHitsClusterSize","clusterSize of associated hits per chamber per eta partition",30,0,30,24,0,24,20,0,20);
   nonAssociatedHitsClusterSize = fs->make<TH3D>("nonAssociatedHitsClusterSize","clusterSize of non associated hits per chamber per eta partition",30,0,30,24,0,24,20,0,20);
   residualPhi = fs->make<TH1D>("residualPhi","residualPhi",400,-5,5);
-  residualEta = fs->make<TH1D>("residualEta","residualEta",200,-10,10);
+  residualEta = fs->make<TH1D>("residualEta","residualEta",400,-20,20);
   recHitsPerTrack = fs->make<TH1D>("recHitsPerTrack","recHits per reconstructed track",15,0,15);
-  trajMuAngX = fs->make<TH1D>("trajMuAngX","trajAngX (XZ plane)",1000,-1,1);
-  trajMuAngY = fs->make<TH1D>("trajMuAngY","trajAngY (YZ plane)",1000,-0.8,0.8);
-
 
   if(isMC)
   {
     genMuAngX = fs->make<TH1D>("genMuAngX","genAngX (XZ plane)",1000,-1,1);
     genMuAngY = fs->make<TH1D>("genMuAngY","genAngY (YZ plane)",1000,-0.8,0.8);
-    deltaMuAngX = fs->make<TH1D>("deltaMuAngX","trajAngX - genAngX (XZ plane)",1000,-0.1,0.1);
-    deltaMuAngY = fs->make<TH1D>("deltaMuAngY","trajAngY - genAngY (YZ plane)",1000,-0.7,0.7);
   }
 
   // Tree branches declaration
@@ -71,14 +66,16 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("run",&run,"run/I");
   tree->Branch("lumi",&lumi,"lumi/I");
   tree->Branch("ev",&nev,"ev/I");
-  tree->Branch("trajTheta",&trajTheta,"trajTheta/F");
-  tree->Branch("trajPhi",&trajPhi,"trajPhi/F");
-  tree->Branch("trajX",&trajX,"trajX/F");
-  tree->Branch("trajY",&trajY,"trajY/F");
-  tree->Branch("trajZ",&trajZ,"trajZ/F");
-  tree->Branch("trajPx",&trajPx,"trajPx/F");
-  tree->Branch("trajPy",&trajPy,"trajPy/F");
-  tree->Branch("trajPz",&trajPz,"trajPz/F");
+  tree->Branch("nTraj",&nTraj,"nTraj/I");
+  tree->Branch("trajTheta",&trajTheta,"trajTheta[30]/F");
+  tree->Branch("trajPhi",&trajPhi,"trajPh[30]i/F");
+  tree->Branch("trajX",&trajX,"trajX[30]/F");
+  tree->Branch("trajY",&trajY,"trajY[30]/F");
+  tree->Branch("trajZ",&trajZ,"trajZ[30]/F");
+  tree->Branch("trajPx",&trajPx,"trajPx[30]/F");
+  tree->Branch("trajPy",&trajPy,"trajPy[30]/F");
+  tree->Branch("trajPz",&trajPz,"trajPz[30]/F");
+  tree->Branch("nTraj",&nTraj,"nTraj[30]/I");
   tree->Branch("testTrajHitX",&testTrajHitX,"testTrajHitX[30]/F");
   tree->Branch("testTrajHitY",&testTrajHitY,"testTrajHitY[30]/F");
   tree->Branch("testTrajHitZ",&testTrajHitZ,"testTrajHitZ[30]/F");
@@ -88,24 +85,22 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("confTestHitX",&confTestHitX,"confTestHitX[30]/F");
   tree->Branch("confTestHitY",&confTestHitY,"confTestHitY[30]/F");
   tree->Branch("confTestHitZ",&confTestHitZ,"confTestHitZ[30]/F");
-  tree->Branch("nTrajHit",&nTrajHit,"nTrajHit/I");
-  tree->Branch("nTrajRecHit",&nTrajRecHit,"nTrajRecHit/I");
 
   if (isMC)
   {
     // Tree for gen events
     genTree = fs->make<TTree>("genTree", "gen info for QC8");
-    genTree->Branch("genMuPx",&genMuPx,"genMuPx/F");
-    genTree->Branch("genMuPy",&genMuPy,"genMuPy/F");
-    genTree->Branch("genMuPz",&genMuPz,"genMuPz/F");
-    genTree->Branch("genMuPt",&genMuPt,"genMuPt/F");
-    genTree->Branch("genMuTheta",&genMuTheta,"genMuTheta/F");
-    genTree->Branch("genMuPhi",&genMuPhi,"genMuPhi/F");
-    genTree->Branch("genMuX",&genMuX,"genMuX/F");
-    genTree->Branch("genMuY",&genMuY,"genMuY/F");
-    genTree->Branch("genMuZ",&genMuZ,"genMuZ/F");
-    genTree->Branch("genAngX",&genAngX,"genAngX/F");
-    genTree->Branch("genAngY",&genAngY,"genAngY/F");
+    genTree->Branch("genMuPx",&genMuPx,"genMuPx[30]/F");
+    genTree->Branch("genMuPy",&genMuPy,"genMuPy[30]/F");
+    genTree->Branch("genMuPz",&genMuPz,"genMuPz[30]/F");
+    genTree->Branch("genMuPt",&genMuPt,"genMuPt[30]/F");
+    genTree->Branch("genMuPhi",&genMuPhi,"genMuPhi[30]/F");
+    genTree->Branch("genMuTheta",&genMuTheta,"genMuTheta[30]/F");
+    genTree->Branch("genMuX",&genMuX,"genMuX[30]/F");
+    genTree->Branch("genMuY",&genMuY,"genMuY[30]/F");
+    genTree->Branch("genMuZ",&genMuZ,"genMuZ[30]/F");
+    genTree->Branch("genAngX",&genAngX,"genAngX[30]/F");
+    genTree->Branch("genAngY",&genAngY,"genAngY[30]/F");
   }
 
   printf("End of ValidationQC8::ValidationQC8() at %s\n", asctime(localtime(&rawTime)));
@@ -187,41 +182,39 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
   nrecHit = 0;
   nTraj = 0;
 
-  trajTheta = -999.9;
-  trajPhi = -999.9;
-  trajX = -999.9;
-  trajY = -999.9;
-  trajZ = -999.9;
-  trajPx = -999.9;
-  trajPy = -999.9;
-  trajPz = -999.9;
-  nTrajHit = 0;
-  nTrajRecHit = 0;
-  trajAngX = 999.9;
-  trajAngY = 999.9;
-
-  if (isMC)
-  {
-    genMuPx = -999.9;
-    genMuPy = -999.9;
-    genMuPz = -999.9;
-    genMuPt = -999.9;
-    genMuTheta = -999.9;
-    genMuPhi = -999.9;
-    genMuX = -999.9;
-    genMuY = -999.9;
-    genMuZ = -999.9;
-    genAngX = -999.9;
-    genAngY = -999.9;
-  }
-
   for (int i=0; i<30; i++)
   {
+    // Not in tree
+
     nDigisPerCh[i] = 0;
     nOfNonAssHits[i] = 0;
+
+    // In tree
+
+    trajPhi[i] = trajTheta[i] = -999.9;
+    trajX[i] = trajY[i] = trajZ[i] = -999.9;
+    trajPx[i] = trajPy[i] = trajPz[i] = -999.9;
+    nRecHitsTraj[i] = 0;
     testTrajHitX[i] = testTrajHitY[i] = testTrajHitZ[i] = -999.9;
     testTrajHitXerr[i] = testTrajHitYerr[i] = testTrajHitZerr[i] = -999.9;
     confTestHitX[i] = confTestHitY[i] = confTestHitZ[i] = -999.9;
+
+    // In genTree
+
+    if (isMC)
+    {
+      genMuPx[i] = -999.9;
+      genMuPy[i] = -999.9;
+      genMuPz[i] = -999.9;
+      genMuPt[i] = -999.9;
+      genMuTheta[i] = -999.9;
+      genMuPhi[i] = -999.9;
+      genMuX[i] = -999.9;
+      genMuY[i] = -999.9;
+      genMuZ[i] = -999.9;
+      genAngX[i] = -999.9;
+      genAngY[i] = -999.9;
+    }
   }
 
   // Get the events when a chamber was tripping
@@ -429,19 +422,17 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
     nTraj++;
 
-    trajTheta = gvecTrack.theta();
-    trajPhi = gvecTrack.phi();
-    trajX = trackPCA.x();
-    trajY = trackPCA.y();
-    trajZ = trackPCA.z();
-    trajPx = gvecTrack.x();
-    trajPy = gvecTrack.y();
-    trajPz = gvecTrack.z();
-    trajAngX = atan(trajPx/trajPz);
-    trajAngY = atan(trajPy/trajPz);
+    int chIndex = findIndex(tch.id());
 
-    trajMuAngX->Fill(trajAngX);
-    trajMuAngY->Fill(trajAngY);
+    trajTheta[chIndex] = gvecTrack.theta();
+    trajPhi[chIndex] = gvecTrack.phi();
+    trajX[chIndex] = trackPCA.x();
+    trajY[chIndex] = trackPCA.y();
+    trajZ[chIndex] = trackPCA.z();
+    trajPx[chIndex] = gvecTrack.x();
+    trajPy[chIndex] = gvecTrack.y();
+    trajPz[chIndex] = gvecTrack.z();
+    nRecHitsTraj[chIndex] = size(bestTraj.recHits());
     recHitsPerTrack->Fill(size(bestTraj.recHits()));
 
     if (isMC)
@@ -452,25 +443,23 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
       e.getByToken( this->InputTagToken_US, genVtx);
       genMuon = genVtx->GetEvent()->barcode_to_particle(1);
 
-      genMuPx = float(genMuon->momentum().x());
-      genMuPy = float(genMuon->momentum().y());
-      genMuPz = float(genMuon->momentum().z());
-      genMuPt = float(genMuon->momentum().perp());
-      genMuTheta = float(genMuon->momentum().theta());
-      genMuPhi = float(genMuon->momentum().phi());
-      genAngX = atan(genMuPx/genMuPz);
-      genAngY = atan(genMuPy/genMuPz);
+      genMuPx[chIndex] = float(genMuon->momentum().x());
+      genMuPy[chIndex] = float(genMuon->momentum().y());
+      genMuPz[chIndex] = float(genMuon->momentum().z());
+      genMuPt[chIndex] = float(genMuon->momentum().perp());
+      genMuPhi[chIndex] = float(genMuon->momentum().phi());
+      genMuTheta[chIndex] = float(genMuon->momentum().theta());
+      genAngX[chIndex] = atan(genMuPx[chIndex]/genMuPz[chIndex]);
+      genAngY[chIndex] = atan(genMuPy[chIndex]/genMuPz[chIndex]);
 
-      genMuAngX->Fill(genAngX);
-      genMuAngY->Fill(genAngY);
-      deltaMuAngX->Fill(trajAngX-genAngX);
-      deltaMuAngY->Fill(trajAngY-genAngY);
+      genMuAngX->Fill(genAngX[chIndex]);
+      genMuAngY->Fill(genAngY[chIndex]);
 
       float dUnitGen = 0.1;
 
-      genMuX = float(dUnitGen * genMuon->production_vertex()->position().x());
-      genMuY = float(dUnitGen * genMuon->production_vertex()->position().y());
-      genMuZ = float(dUnitGen * genMuon->production_vertex()->position().z());
+      genMuX[chIndex] = float(dUnitGen * genMuon->production_vertex()->position().x());
+      genMuY[chIndex] = float(dUnitGen * genMuon->production_vertex()->position().y());
+      genMuZ[chIndex] = float(dUnitGen * genMuon->production_vertex()->position().z());
 
       genTree->Fill();
     }
@@ -653,7 +642,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
                   {
                     associatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitVFAT-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
                   }
-                  else if (fabs(rechitGP.x()-tempHitGP.x())>1.0 && fabs(rechitGP.y()-tempHitGP.y())>1.0)
+                  else if (fabs(rechitGP.x()-tempHitGP.x())>maxRes && fabs(rechitGP.y()-tempHitGP.y())>1.0)
                   {
                     nonAssociatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitVFAT-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
                     nonAssociatedHits2DPerLayer->Fill(rechitGP.x(),hitRoll-1,recHitCh%10);
