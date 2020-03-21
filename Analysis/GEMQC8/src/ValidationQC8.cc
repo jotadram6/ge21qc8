@@ -67,8 +67,8 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("lumi",&lumi,"lumi/I");
   tree->Branch("ev",&nev,"ev/I");
   tree->Branch("nTraj",&nTraj,"nTraj/I");
+  tree->Branch("trajPhi",&trajPhi,"trajPhi[30]/F");
   tree->Branch("trajTheta",&trajTheta,"trajTheta[30]/F");
-  tree->Branch("trajPhi",&trajPhi,"trajPh[30]i/F");
   tree->Branch("trajX",&trajX,"trajX[30]/F");
   tree->Branch("trajY",&trajY,"trajY[30]/F");
   tree->Branch("trajZ",&trajZ,"trajZ[30]/F");
