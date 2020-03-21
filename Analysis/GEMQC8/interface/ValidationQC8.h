@@ -65,7 +65,7 @@ public:
   void bookHistograms(DQMStore::IBooker &, edm::Run const &, edm::EventSetup const &) override;
   void analyze(const edm::Event& e, const edm::EventSetup&) override;
   int findIndex(GEMDetId id_);
-  int findVFAT(float x, float a, float b);
+  int findiPhi(float x, float a, float b);
   const GEMGeometry* initGeometry(edm::EventSetup const & iSetup);
   double maxCLS, minCLS, maxRes, trackChi2, trackResY, trackResX, MulSigmaOnWindow;
   std::vector<std::string> SuperChamType;
@@ -132,6 +132,8 @@ private:
   float confTestHitY[30];
   float confTestHitZ[30];
   int confTestHitClSize[30];
+  int confTestHitiPhi[30];
+  int confTestHitiEta[30];
 
   TTree *genTree;
   float genMuPx[30];

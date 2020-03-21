@@ -86,6 +86,8 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("confTestHitY",&confTestHitY,"confTestHitY[30]/F");
   tree->Branch("confTestHitZ",&confTestHitZ,"confTestHitZ[30]/F");
   tree->Branch("confTestHitClSize",&confTestHitClSize,"confTestHitClSize[30]/I");
+  tree->Branch("confTestHitiPhi",&confTestHitiPhi,"confTestHitiPhi[30]/I");
+  tree->Branch("confTestHitiEta",&confTestHitiEta,"confTestHitiEta[30]/I");
 
 
   if (isMC)
@@ -135,7 +137,7 @@ int ValidationQC8::findIndex(GEMDetId id_)
   return id_.chamberId().chamber()+id_.chamberId().layer()-2;
 }
 
-int ValidationQC8::findVFAT(float x, float a, float b) {
+int ValidationQC8::findiPhi(float x, float a, float b) {
   float step = fabs(b-a)/3.0;
   if ( x < (min(a,b)+step) ) { return 1;}
   else if ( x < (min(a,b)+2.0*step) ) { return 2;}
@@ -200,6 +202,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     testTrajHitX[i] = testTrajHitY[i] = testTrajHitZ[i] = -999.9;
     testTrajHitXerr[i] = testTrajHitYerr[i] = testTrajHitZerr[i] = -999.9;
     confTestHitX[i] = confTestHitY[i] = confTestHitZ[i] = -999.9;
+    confTestHitiEta[i] = confTestHitiPhi[i] = -1;
 
     // In genTree
 
@@ -323,7 +326,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     double max_x = chHit.etaPartition(rhEta)->centreOfStrip(n_strip-1).x();
 
     Local3DPoint rhLP = rechit->localPosition();
-    int rhPhi = findVFAT(rhLP.x(), min_x, max_x);
+    int rhPhi = findiPhi(rhLP.x(), min_x, max_x);
 
     clusterSize->Fill(chIdRecHit,8-rhEta+8*(rhPhi-1),(*rechit).clusterSize());
 
@@ -531,7 +534,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
           }
 
           int index = findIndex(ch.id());
-          int vfat = findVFAT(tlp.x(), min_x, max_x);
+          int iPhi = findiPhi(tlp.x(), min_x, max_x);
 
           bool validEvent = true;
       	  for (unsigned int i = 0; i < beginTripEvt[index].size(); i++)
@@ -605,12 +608,12 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
           	  Local3DPoint tempHitLP = tmpRecHit->localPosition();
 
-          	  int hitVFAT = findVFAT(tempHitLP.x(), min_x, max_x);
+          	  int hitiPhi = findiPhi(tempHitLP.x(), min_x, max_x);
 
-              hitsVFATdenom->Fill(hitVFAT-1,hitRoll-1,index);
+              hitsVFATdenom->Fill(hitiPhi-1,hitRoll-1,index);
               denom2DPerLayer->Fill(tempHitGP.x(),hitRoll-1,index%10);
 
-              hitsVFATnum->Fill(hitVFAT-1,hitRoll-1,index);
+              hitsVFATnum->Fill(hitiPhi-1,hitRoll-1,index);
               num2DPerLayer->Fill(tempHitGP.x(),hitRoll-1,index%10);
 
               g_nNumMatched++;
@@ -621,6 +624,9 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
               GEMDetId confirmedHitID((*tmpRecHit).rawId());
               int chConfHit = confirmedHitID.chamber()+confirmedHitID.layer()-2;
               int etaConfHit = confirmedHitID.roll()-1;
+
+              confTestHitiPhi[chConfHit] = hitiPhi;
+              confTestHitiEta[chConfHit] = hitRoll;
 
               associatedHits2DPerLayer->Fill(tempHitGP.x(),etaConfHit,chConfHit%10);
 
@@ -637,12 +643,12 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
                   if (fabs(rechitGP.x()-tempHitGP.x())<0.01 && fabs(rechitGP.y()-tempHitGP.y())<0.01)
                   {
-                    associatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitVFAT-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
+                    associatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitiPhi-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
                     confTestHitClSize[recHitCh] = (*rechit).clusterSize();
                   }
                   else if (fabs(rechitGP.x()-tempHitGP.x())>maxRes && fabs(rechitGP.y()-tempHitGP.y())>1.0)
                   {
-                    nonAssociatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitVFAT-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
+                    nonAssociatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitiPhi-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
                     nonAssociatedHits2DPerLayer->Fill(rechitGP.x(),hitRoll-1,recHitCh%10);
                     nOfNonAssHits[recHitCh]++;
                   }
@@ -651,7 +657,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
             }
             if(!tmpRecHit)
             {
-              hitsVFATdenom->Fill(vfat-1,mRoll-1,index);
+              hitsVFATdenom->Fill(iPhi-1,mRoll-1,index);
               denom2DPerLayer->Fill(gtrp.x(),mRoll-1,index%10);
             }
             nonAssRecHitsPerEvt->Fill(index,nOfNonAssHits[index]);
