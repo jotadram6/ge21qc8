@@ -205,7 +205,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     testTrajHitXerr[i] = testTrajHitYerr[i] = testTrajHitZerr[i] = -999.9;
     confTestHitX[i] = confTestHitY[i] = confTestHitZ[i] = -999.9;
     confTestHitXerr[i] = confTestHitYerr[i] = -999.9;
-    confTestHitiEta[i] = confTestHitiPhi[i] = -1;
+    confTestHitiEta[i] = confTestHitiPhi[i] = confTestHitClSize[i] = -1;
 
     // In genTree
 
