@@ -85,6 +85,8 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("confTestHitX",&confTestHitX,"confTestHitX[30]/F");
   tree->Branch("confTestHitY",&confTestHitY,"confTestHitY[30]/F");
   tree->Branch("confTestHitZ",&confTestHitZ,"confTestHitZ[30]/F");
+  tree->Branch("confTestHitXerr",&confTestHitXerr,"confTestHitXerr[30]/F");
+  tree->Branch("confTestHitYerr",&confTestHitYerr,"confTestHitYerr[30]/F");
   tree->Branch("confTestHitClSize",&confTestHitClSize,"confTestHitClSize[30]/I");
   tree->Branch("confTestHitiPhi",&confTestHitiPhi,"confTestHitiPhi[30]/I");
   tree->Branch("confTestHitiEta",&confTestHitiEta,"confTestHitiEta[30]/I");
@@ -202,6 +204,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     testTrajHitX[i] = testTrajHitY[i] = testTrajHitZ[i] = -999.9;
     testTrajHitXerr[i] = testTrajHitYerr[i] = testTrajHitZerr[i] = -999.9;
     confTestHitX[i] = confTestHitY[i] = confTestHitZ[i] = -999.9;
+    confTestHitXerr[i] = confTestHitYerr[i] = -999.9;
     confTestHitiEta[i] = confTestHitiPhi[i] = -1;
 
     // In genTree
@@ -645,6 +648,8 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
                   {
                     associatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitiPhi-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
                     confTestHitClSize[recHitCh] = (*rechit).clusterSize();
+                    confTestHitXerr[recHitCh] = (*rechit).localPositionError().xx();
+                    confTestHitYerr[recHitCh] = (*rechit).localPositionError().yy();
                   }
                   else if (fabs(rechitGP.x()-tempHitGP.x())>maxRes && fabs(rechitGP.y()-tempHitGP.y())>1.0)
                   {

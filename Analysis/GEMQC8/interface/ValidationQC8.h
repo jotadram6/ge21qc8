@@ -131,6 +131,8 @@ private:
   float confTestHitX[30];
   float confTestHitY[30];
   float confTestHitZ[30];
+  float confTestHitXerr[30];
+  float confTestHitYerr[30];
   int confTestHitClSize[30];
   int confTestHitiPhi[30];
   int confTestHitiEta[30];
