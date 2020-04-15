@@ -76,6 +76,8 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("trajPy",&trajPy,"trajPy[30]/F");
   tree->Branch("trajPz",&trajPz,"trajPz[30]/F");
   tree->Branch("nRecHitsTraj",&nRecHitsTraj,"nRecHitsTraj[30]/I");
+  tree->Branch("chi2Traj",&chi2Traj,"chi2Traj[30]/F");
+  tree->Branch("ndofTraj",&ndofTraj,"ndofTraj[30]/I");
   tree->Branch("testTrajHitX",&testTrajHitX,"testTrajHitX[30]/F");
   tree->Branch("testTrajHitY",&testTrajHitY,"testTrajHitY[30]/F");
   tree->Branch("testTrajHitZ",&testTrajHitZ,"testTrajHitZ[30]/F");
@@ -200,7 +202,8 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     trajPhi[i] = trajTheta[i] = -999.9;
     trajX[i] = trajY[i] = trajZ[i] = -999.9;
     trajPx[i] = trajPy[i] = trajPz[i] = -999.9;
-    nRecHitsTraj[i] = 0;
+    chi2Traj[i] = 0.0;
+    ndofTraj[i] = nRecHitsTraj[i] = 0;
     testTrajHitX[i] = testTrajHitY[i] = testTrajHitZ[i] = -999.9;
     testTrajHitXerr[i] = testTrajHitYerr[i] = testTrajHitZerr[i] = -999.9;
     confTestHitX[i] = confTestHitY[i] = confTestHitZ[i] = -999.9;
@@ -425,8 +428,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     PTrajectoryStateOnDet ptsd1(bestSeed.startingState());
     DetId did(ptsd1.detId());
     const BoundPlane& bp = theService->trackingGeometry()->idToDet(did)->surface();
-    TrajectoryStateOnSurface tsos = trajectoryStateTransform::transientState(ptsd1,&bp,&*theService->magneticField());
-    TrajectoryStateOnSurface tsosCurrent = tsos;
+    TrajectoryStateOnSurface tsosCurrent = trajectoryStateTransform::transientState(ptsd1,&bp,&*theService->magneticField());
 
     nTraj++;
 
@@ -442,6 +444,8 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     trajPz[chIndex] = gvecTrack.z();
     nRecHitsTraj[chIndex] = size(bestTraj.recHits());
     recHitsPerTrack->Fill(size(bestTraj.recHits()));
+    chi2Traj[chIndex] = bestTraj.chiSquared();
+    ndofTraj[chIndex] = bestTraj.ndof();
 
     if (isMC)
     {
@@ -480,12 +484,17 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
       const BoundPlane& bpch = GEMGeometry_->idToDet(ch.id())->surface();
       tsosCurrent = theService->propagator("SteppingHelixPropagatorAny")->propagate(tsosCurrent, bpch);
       if (!tsosCurrent.isValid()) continue;
-      Global3DPoint gtrp = tsosCurrent.freeTrajectoryState()->position();
-      Local3DPoint tlp = bpch.toLocal(gtrp);
-      if (!bpch.bounds().inside(tlp)) continue;
 
       if (ch==tch)
       {
+        double propPointX = (bestTraj.firstMeasurement().updatedState().globalPosition().x()-bestTraj.lastMeasurement().updatedState().globalPosition().x())/(bestTraj.firstMeasurement().updatedState().globalPosition().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())*(tsosCurrent.freeTrajectoryState()->position().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())+bestTraj.lastMeasurement().updatedState().globalPosition().x();
+        double propPointY = (bestTraj.firstMeasurement().updatedState().globalPosition().y()-bestTraj.lastMeasurement().updatedState().globalPosition().y())/(bestTraj.firstMeasurement().updatedState().globalPosition().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())*(tsosCurrent.freeTrajectoryState()->position().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())+bestTraj.lastMeasurement().updatedState().globalPosition().y();
+
+        Global3DPoint gtrp = Global3DPoint(propPointX,propPointY,tsosCurrent.freeTrajectoryState()->position().z());
+
+        Local3DPoint tlp = bpch.toLocal(gtrp);
+        if (!bpch.bounds().inside(tlp)) continue;
+
         // Find the ieta partition ( -> mRoll )
 
         int n_roll = ch.nEtaPartitions();
@@ -553,9 +562,6 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
             testTrajHitX[index] = gtrp.x();
             testTrajHitY[index] = gtrp.y();
             testTrajHitZ[index] = gtrp.z();
-            testTrajHitXerr[index] = sqrt(tsosCurrent.freeTrajectoryState()->cartesianError().matrix()(0,0));
-            testTrajHitYerr[index] = sqrt(tsosCurrent.freeTrajectoryState()->cartesianError().matrix()(1,1));
-            testTrajHitZerr[index] = sqrt(tsosCurrent.freeTrajectoryState()->cartesianError().matrix()(2,2));
 
             g_nNumTrajHit++;
 
@@ -586,7 +592,21 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
             if(tmpRecHit)
             {
+              double a = 0.0, b = 0.0, c = 0.0;
+
               Global3DPoint tempHitGP = tmpRecHit->globalPosition();
+
+              testTrajHitX[index] = (bestTraj.firstMeasurement().updatedState().globalPosition().x()-bestTraj.lastMeasurement().updatedState().globalPosition().x())/(bestTraj.firstMeasurement().updatedState().globalPosition().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())*(tempHitGP.z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())+bestTraj.lastMeasurement().updatedState().globalPosition().x();
+              testTrajHitY[index] = (bestTraj.firstMeasurement().updatedState().globalPosition().y()-bestTraj.lastMeasurement().updatedState().globalPosition().y())/(bestTraj.firstMeasurement().updatedState().globalPosition().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())*(tempHitGP.z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())+bestTraj.lastMeasurement().updatedState().globalPosition().y();
+              testTrajHitZ[index] = tempHitGP.z();
+
+              a = bestTraj.firstMeasurement().updatedState().curvilinearError().matrix()(3,3);
+              b = bestTraj.firstMeasurement().updatedState().curvilinearError().matrix()(4,4);
+              c = bestTraj.firstMeasurement().updatedState().curvilinearError().matrix()(4,3);
+              testTrajHitXerr[index] = sqrt(0.5*(a+b-sqrt((a-b)*(a-b)+4*c*c)));
+              testTrajHitYerr[index] = sqrt(0.5*(a+b+sqrt((a-b)*(a-b)+4*c*c)));
+              testTrajHitZerr[index] = 0.0;
+
               confTestHitX[index] = tempHitGP.x();
               confTestHitY[index] = tempHitGP.y();
               confTestHitZ[index] = tempHitGP.z();

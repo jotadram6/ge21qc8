@@ -122,6 +122,8 @@ private:
   float trajPy[30];
   float trajPz[30];
   int nRecHitsTraj[30];
+  float chi2Traj[30];
+  int ndofTraj[30];
   float testTrajHitX[30];
   float testTrajHitY[30];
   float testTrajHitZ[30];
