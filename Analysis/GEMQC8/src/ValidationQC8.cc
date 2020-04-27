@@ -663,18 +663,20 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
                 if (recHitCh==chConfHit)
                 {
                   GlobalPoint rechitGP = GEMGeometry_->idToDet((*rechit).gemId())->surface().toGlobal(rechit->localPosition());
+                  int recHitiEta = recHitID.roll();
+                  int recHitiPhi = findiPhi(rechit->localPosition().x(), ch.etaPartition(recHitiEta)->centreOfStrip(0).x();, ch.etaPartition(recHitiEta)->centreOfStrip(n_strip-1).x());
 
                   if (fabs(rechitGP.x()-tempHitGP.x())<0.01 && fabs(rechitGP.y()-tempHitGP.y())<0.01)
                   {
-                    associatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitiPhi-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
+                    associatedHitsClusterSize->Fill(recHitCh,8-recHitiEta+8*(recHitiPhi-1),(*rechit).clusterSize());
                     confTestHitClSize[recHitCh] = (*rechit).clusterSize();
                     confTestHitXerr[recHitCh] = (*rechit).localPositionError().xx();
                     confTestHitYerr[recHitCh] = (*rechit).localPositionError().yy();
                   }
                   else if (fabs(rechitGP.x()-tempHitGP.x())>maxRes && fabs(rechitGP.y()-tempHitGP.y())>1.0)
                   {
-                    nonAssociatedHitsClusterSize->Fill(recHitCh,8-hitRoll+8*(hitiPhi-1),(*rechit).clusterSize()); // once matched, ieta and iphi are the same and we can use the ones above
-                    nonAssociatedHits2DPerLayer->Fill(rechitGP.x(),hitRoll-1,recHitCh%10);
+                    nonAssociatedHitsClusterSize->Fill(recHitCh,8-recHitiEta+8*(recHitiPhi-1),(*rechit).clusterSize());
+                    nonAssociatedHits2DPerLayer->Fill(rechitGP.x(),recHitiEta-1,recHitCh%10);
                     nOfNonAssHits[recHitCh]++;
                   }
                 }
