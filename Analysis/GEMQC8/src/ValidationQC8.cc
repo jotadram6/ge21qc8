@@ -664,7 +664,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
                 {
                   GlobalPoint rechitGP = GEMGeometry_->idToDet((*rechit).gemId())->surface().toGlobal(rechit->localPosition());
                   int recHitiEta = recHitID.roll();
-                  int recHitiPhi = findiPhi(rechit->localPosition().x(), ch.etaPartition(recHitiEta)->centreOfStrip(0).x();, ch.etaPartition(recHitiEta)->centreOfStrip(n_strip-1).x());
+                  int recHitiPhi = findiPhi(rechit->localPosition().x(), ch.etaPartition(recHitiEta)->centreOfStrip(0).x(), ch.etaPartition(recHitiEta)->centreOfStrip(n_strip-1).x());
 
                   if (fabs(rechitGP.x()-tempHitGP.x())<0.01 && fabs(rechitGP.y()-tempHitGP.y())<0.01)
                   {
