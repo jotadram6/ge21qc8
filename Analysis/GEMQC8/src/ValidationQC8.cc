@@ -367,28 +367,17 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
   if ( idxChTraj->size() == 0 ) return;
 
+  // Get the propagators
+  edm::ESHandle<Propagator> propagatorAlong;
+  edm::ESHandle<Propagator> propagatorOpposite;
+  iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",propagatorAlong);
+  iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",propagatorOpposite);
+
   int countTC = 0;
 
   for (auto tch : gemChambers)
   {
     countTC += 1;
-
-    // Create collection of recHits in the test chamber
-
-    MuonTransientTrackingRecHit::MuonRecHitContainer testRecHits;
-
-    for (auto etaPart : tch.etaPartitions())
-    {
-      GEMDetId etaPartID = etaPart->id();
-      GEMRecHitCollection::range range = gemRecHits->get(etaPartID);
-      for (GEMRecHitCollection::const_iterator rechit = range.first; rechit!=range.second; ++rechit)
-      {
-        const GeomDet* geomDet(etaPart);
-        if ((*rechit).clusterSize()<minCLS) continue;
-        if ((*rechit).clusterSize()>maxCLS) continue;
-        testRecHits.push_back(MuonTransientTrackingRecHit::specificBuild(geomDet,&*rechit));
-      }
-    }
 
     // Select trajectory correspondent to test chamber excluded from fit
 
@@ -424,11 +413,6 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
     GlobalPoint trackPCA = ftsAtVtx->position();
     GlobalVector gvecTrack = ftsAtVtx->momentum();
-
-    PTrajectoryStateOnDet ptsd1(bestSeed.startingState());
-    DetId did(ptsd1.detId());
-    const BoundPlane& bp = theService->trackingGeometry()->idToDet(did)->surface();
-    TrajectoryStateOnSurface tsosCurrent = trajectoryStateTransform::transientState(ptsd1,&bp,&*theService->magneticField());
 
     nTraj++;
 
@@ -481,41 +465,38 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     for(int c=0; c<n_ch;c++)
     {
       GEMChamber ch = gemChambers[c];
-      const BoundPlane& bpch = GEMGeometry_->idToDet(ch.id())->surface();
-      tsosCurrent = theService->propagator("SteppingHelixPropagatorAny")->propagate(tsosCurrent, bpch);
-      if (!tsosCurrent.isValid()) continue;
 
       if (ch==tch)
       {
-        double propPointX = (bestTraj.firstMeasurement().updatedState().globalPosition().x()-bestTraj.lastMeasurement().updatedState().globalPosition().x())/(bestTraj.firstMeasurement().updatedState().globalPosition().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())*(tsosCurrent.freeTrajectoryState()->position().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())+bestTraj.lastMeasurement().updatedState().globalPosition().x();
-        double propPointY = (bestTraj.firstMeasurement().updatedState().globalPosition().y()-bestTraj.lastMeasurement().updatedState().globalPosition().y())/(bestTraj.firstMeasurement().updatedState().globalPosition().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())*(tsosCurrent.freeTrajectoryState()->position().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())+bestTraj.lastMeasurement().updatedState().globalPosition().y();
-
-        Global3DPoint gtrp = Global3DPoint(propPointX,propPointY,tsosCurrent.freeTrajectoryState()->position().z());
-
-        Local3DPoint tlp = bpch.toLocal(gtrp);
-        if (!bpch.bounds().inside(tlp)) continue;
+      	FreeTrajectoryState startPoint(bestTraj.lastMeasurement().updatedState().globalParameters().position(),bestTraj.lastMeasurement().updatedState().globalParameters().momentum(),bestTrack.charge(),&*theService->magneticField());
+        startPoint.setCurvilinearError(bestTraj.lastMeasurement().updatedState().curvilinearError());
 
         // Find the ieta partition ( -> mRoll )
 
-        int n_roll = ch.nEtaPartitions();
-        double minDeltaY = 50.;
         int mRoll = -1;
-        for (int r=0; r<n_roll; r++)
+      	int n_eta = ch.nEtaPartitions();
+
+      	TrajectoryStateOnSurface tsosTestProp;
+      	TrajectoryStateOnSurface tsosProp;
+
+      	for (int ieta=0; ieta<n_eta and mRoll==-1; ieta++)
         {
-          const BoundPlane& bproll = GEMGeometry_->idToDet(ch.etaPartition(r+1)->id())->surface();
-          Local3DPoint rtlp = bproll.toLocal(gtrp);
-          if (minDeltaY > fabs(rtlp.y()))
+          const BoundPlane& bpeta = GEMGeometry_->idToDet(ch.etaPartition(ieta+1)->id())->surface();
+
+          tsosTestProp = propagatorAlong->propagate(startPoint, bpeta);
+          if (!tsosTestProp.isValid()) tsosTestProp = propagatorOpposite->propagate(startPoint, bpeta);
+          if (!tsosTestProp.isValid()) continue;
+          if (bpeta.bounds().inside(tsosTestProp.localPosition()))
           {
-            minDeltaY = fabs(rtlp.y());
-            mRoll = r+1;
+            mRoll = ieta+1;
+            tsosProp = tsosTestProp;
           }
         }
 
-        if (mRoll == -1)
-        {
-          cout << "no mRoll" << endl;
-          continue;
-        }
+        if (mRoll == -1) continue; // The track was not passing through that chamber... (another column, etc...)
+
+      	Global3DPoint gtrp = tsosProp.globalPosition();
+        Local3DPoint tlp = tsosProp.localPosition();
 
         // Define region 'inside' the ieta of the chamber
 
@@ -523,27 +504,17 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
         double min_x = ch.etaPartition(mRoll)->centreOfStrip(0).x();
         double max_x = ch.etaPartition(mRoll)->centreOfStrip(n_strip-1).x();
 
-        if ( (tlp.x()>(min_x)) & (tlp.x() < (max_x)) )
+        if (tlp.x()>min_x and tlp.x()<max_x)
         {
           // For testing the edge eta partition on the top and bottom layers only vertical seeds are allowed!
 
-          if ( ( vecChamType[ countTC - 1 ] == 2 || vecChamType[ countTC - 1 ] == 1 ) &&
-              ( mRoll == 1 || mRoll == 8 ) &&
+          if ( ( vecChamType[ countTC - 1 ] == 2 || vecChamType[ countTC - 1 ] == 1 ) and
+              ( mRoll == 1 || mRoll == 8 ) and
               ( unTypeSeed & QC8FLAG_SEEDINFO_MASK_REFVERTROLL18 ) == 0 ) continue;
 
           uint32_t unDiffCol = ( unTypeSeed & QC8FLAG_SEEDINFO_MASK_DIFFCOL ) >> QC8FLAG_SEEDINFO_SHIFT_DIFFCOL;
 
-          if ( ! ( (tlp.x()>(min_x + 1.5)) & (tlp.x() < (max_x - 1.5)) ) )
-          {
-            if ( unDiffCol != 0 )
-            {
-              continue;
-            }
-            else if ( ( vecChamType[ countTC - 1 ] == 2 || vecChamType[ countTC - 1 ] == 1 ) )
-            {
-              continue;
-            }
-          }
+          if ((tlp.x()<(min_x + 1.5) or tlp.x()>(max_x - 1.5)) and (unDiffCol!=0 or vecChamType[countTC-1]==1 or vecChamType[countTC-1]==2)) continue;
 
           int index = findIndex(ch.id());
           int iPhi = findiPhi(tlp.x(), min_x, max_x);
@@ -561,128 +532,108 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
           {
             testTrajHitX[index] = gtrp.x();
             testTrajHitY[index] = gtrp.y();
-            testTrajHitZ[index] = gtrp.z();
+        	testTrajHitZ[index] = gtrp.z();
+
+        	double a = tsosProp.curvilinearError().matrix()(3,3);
+        	double b = tsosProp.curvilinearError().matrix()(4,4);
+        	double c = tsosProp.curvilinearError().matrix()(4,3);
+        	testTrajHitXerr[index] = sqrt(0.5*(a+b-sqrt((a-b)*(a-b)+4*c*c)));
+        	testTrajHitYerr[index] = sqrt(0.5*(a+b+sqrt((a-b)*(a-b)+4*c*c)));
+        	testTrajHitZerr[index] = 0.0;
 
             g_nNumTrajHit++;
 
-            // Check if there's a matching recHit in the test chamber (tmpRecHit)
+            // Check if there's a matching recHit in the test chamber (confRecHit) - confirming recHit
+
+            GEMRecHit confRecHit;
 
             double maxR = 99.9;
-            shared_ptr<MuonTransientTrackingRecHit> tmpRecHit;
 
-            for (auto hit : testRecHits)
-            {
-              GEMDetId hitID(hit->rawId());
-              if (hitID.chamberId() != ch.id()) continue;
+            for ( GEMRecHitCollection::const_iterator hit = gemRecHits->begin(); hit != gemRecHits->end(); ++hit )
+  			{
+  			  // cluster size selection
+    		  if ((*hit).clusterSize()<minCLS or (*hit).clusterSize()>maxCLS) continue;
 
-              GlobalPoint hitGP = hit->globalPosition();
+  			  // hit in test chamber?
+  			  GEMDetId hitID((*hit).rawId());
+  			  if (findIndex(hitID) != index) continue;
+
+    		  GlobalPoint hitGP = GEMGeometry_->idToDet((*hit).gemId())->surface().toGlobal(hit->localPosition());
 
               if (fabs(hitGP.x() - gtrp.x()) > maxRes) continue;
               if (fabs(hitID.roll() - mRoll) > 1) continue;
 
               // Choosing the closest one
-
               double deltaR = (hitGP - gtrp).mag();
               if (deltaR < maxR)
               {
-                tmpRecHit = hit;
+                confRecHit = *hit;
                 maxR = deltaR;
               }
             }
 
-            if(tmpRecHit)
+            if (confRecHit.rawId()>0)
             {
-              double a = 0.0, b = 0.0, c = 0.0;
+              // All confRecHit details
 
-              Global3DPoint tempHitGP = tmpRecHit->globalPosition();
+              GEMDetId confHitID(confRecHit.rawId());
+              int confHitiEta = confHitID.roll();
+              confTestHitiEta[index] = confHitiEta;
 
-              testTrajHitX[index] = (bestTraj.firstMeasurement().updatedState().globalPosition().x()-bestTraj.lastMeasurement().updatedState().globalPosition().x())/(bestTraj.firstMeasurement().updatedState().globalPosition().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())*(tempHitGP.z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())+bestTraj.lastMeasurement().updatedState().globalPosition().x();
-              testTrajHitY[index] = (bestTraj.firstMeasurement().updatedState().globalPosition().y()-bestTraj.lastMeasurement().updatedState().globalPosition().y())/(bestTraj.firstMeasurement().updatedState().globalPosition().z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())*(tempHitGP.z()-bestTraj.lastMeasurement().updatedState().globalPosition().z())+bestTraj.lastMeasurement().updatedState().globalPosition().y();
-              testTrajHitZ[index] = tempHitGP.z();
+      		    int n_strip = ch.etaPartition(confHitiEta)->nstrips();
+          	  double min_x = ch.etaPartition(confHitiEta)->centreOfStrip(0).x();
+          	  double max_x = ch.etaPartition(confHitiEta)->centreOfStrip(n_strip-1).x();
 
-              a = bestTraj.firstMeasurement().updatedState().curvilinearError().matrix()(3,3);
-              b = bestTraj.firstMeasurement().updatedState().curvilinearError().matrix()(4,4);
-              c = bestTraj.firstMeasurement().updatedState().curvilinearError().matrix()(4,3);
-              testTrajHitXerr[index] = sqrt(0.5*(a+b-sqrt((a-b)*(a-b)+4*c*c)));
-              testTrajHitYerr[index] = sqrt(0.5*(a+b+sqrt((a-b)*(a-b)+4*c*c)));
-              testTrajHitZerr[index] = 0.0;
+              int confHitiPhi = findiPhi(confRecHit.localPosition().x(), min_x, max_x);
+              confTestHitiPhi[index] = confHitiPhi;
 
-              confTestHitX[index] = tempHitGP.x();
-              confTestHitY[index] = tempHitGP.y();
-              confTestHitZ[index] = tempHitGP.z();
+              Global3DPoint confHitGP = GEMGeometry_->idToDet(confRecHit.gemId())->surface().toGlobal(confRecHit.localPosition());
 
-              n_roll = ch.nEtaPartitions();
-        	    minDeltaY = 50.;
-              int hitRoll = -1;
-              for (int r=0; r<n_roll; r++)
-              {
-                const BoundPlane& bproll = GEMGeometry_->idToDet(ch.etaPartition(r+1)->id())->surface();
-                Local3DPoint hittlp = bproll.toLocal(tempHitGP);
-                if (minDeltaY > fabs(hittlp.y()))
-                {
-                  minDeltaY = fabs(hittlp.y());
-                  hitRoll = r+1;
-                }
-              }
+              confTestHitX[index] = confHitGP.x();
+              confTestHitY[index] = confHitGP.y();
+              confTestHitZ[index] = confHitGP.z();
 
-              int n_strip = ch.etaPartition(hitRoll)->nstrips();
-          	  double min_x = ch.etaPartition(hitRoll)->centreOfStrip(0).x();
-          	  double max_x = ch.etaPartition(hitRoll)->centreOfStrip(n_strip-1).x();
+          	  associatedHitsClusterSize->Fill(index,8-confHitiEta+8*(confHitiPhi-1),confRecHit.clusterSize());
+              confTestHitClSize[index] = confRecHit.clusterSize();
+              confTestHitXerr[index] = confRecHit.localPositionError().xx();
+              confTestHitYerr[index] = confRecHit.localPositionError().yy();
 
-          	  Local3DPoint tempHitLP = tmpRecHit->localPosition();
+              hitsVFATdenom->Fill(confHitiPhi-1,confHitiEta-1,index);
+              denom2DPerLayer->Fill(confHitGP.x(),confHitiEta-1,index%10);
 
-          	  int hitiPhi = findiPhi(tempHitLP.x(), min_x, max_x);
-
-              hitsVFATdenom->Fill(hitiPhi-1,hitRoll-1,index);
-              denom2DPerLayer->Fill(tempHitGP.x(),hitRoll-1,index%10);
-
-              hitsVFATnum->Fill(hitiPhi-1,hitRoll-1,index);
-              num2DPerLayer->Fill(tempHitGP.x(),hitRoll-1,index%10);
+              hitsVFATnum->Fill(confHitiPhi-1,confHitiEta-1,index);
+              num2DPerLayer->Fill(confHitGP.x(),confHitiEta-1,index%10);
 
               g_nNumMatched++;
 
-              residualPhi->Fill(tempHitGP.x()-gtrp.x());
-              residualEta->Fill(tempHitGP.y()-gtrp.y());
+              residualPhi->Fill(confHitGP.x()-gtrp.x());
+              residualEta->Fill(confHitGP.y()-gtrp.y());
 
-              GEMDetId confirmedHitID((*tmpRecHit).rawId());
-              int chConfHit = confirmedHitID.chamber()+confirmedHitID.layer()-2;
-              int etaConfHit = confirmedHitID.roll()-1;
+              associatedHits2DPerLayer->Fill(confHitGP.x(),confHitiEta,index%10);
 
-              confTestHitiPhi[chConfHit] = hitiPhi;
-              confTestHitiEta[chConfHit] = hitRoll;
-
-              associatedHits2DPerLayer->Fill(tempHitGP.x(),etaConfHit,chConfHit%10);
-
-              // to find the (non) associated hits cluster size, need to match tempHit with corresponding recHit, since tempHit (being a trackHit) has no info about it
+              // to find the non associated hits cluster size
 
               for ( GEMRecHitCollection::const_iterator rechit = gemRecHits->begin(); rechit != gemRecHits->end(); ++rechit )
               {
                 GEMDetId recHitID((*rechit).rawId());
                 int recHitCh = recHitID.chamber()+recHitID.layer()-2;
 
-                if (recHitCh==chConfHit)
+                if (recHitCh==index)
                 {
                   GlobalPoint rechitGP = GEMGeometry_->idToDet((*rechit).gemId())->surface().toGlobal(rechit->localPosition());
                   int recHitiEta = recHitID.roll();
                   int recHitiPhi = findiPhi(rechit->localPosition().x(), ch.etaPartition(recHitiEta)->centreOfStrip(0).x(), ch.etaPartition(recHitiEta)->centreOfStrip(n_strip-1).x());
 
-                  if (fabs(rechitGP.x()-tempHitGP.x())<0.01 && fabs(rechitGP.y()-tempHitGP.y())<0.01)
-                  {
-                    associatedHitsClusterSize->Fill(recHitCh,8-recHitiEta+8*(recHitiPhi-1),(*rechit).clusterSize());
-                    confTestHitClSize[recHitCh] = (*rechit).clusterSize();
-                    confTestHitXerr[recHitCh] = (*rechit).localPositionError().xx();
-                    confTestHitYerr[recHitCh] = (*rechit).localPositionError().yy();
-                  }
-                  else if (fabs(rechitGP.x()-tempHitGP.x())>maxRes && fabs(rechitGP.y()-tempHitGP.y())>1.0)
+                  if (fabs(rechitGP.x()-confHitGP.x())>maxRes && fabs(rechitGP.y()-confHitGP.y())>1.0)
                   {
                     nonAssociatedHitsClusterSize->Fill(recHitCh,8-recHitiEta+8*(recHitiPhi-1),(*rechit).clusterSize());
-                    nonAssociatedHits2DPerLayer->Fill(rechitGP.x(),recHitiEta-1,recHitCh%10);
-                    nOfNonAssHits[recHitCh]++;
+                    nonAssociatedHits2DPerLayer->Fill(rechitGP.x(),recHitiEta-1,index%10);
+                    nOfNonAssHits[index]++;
                   }
                 }
               }
             }
-            if(!tmpRecHit)
+            if (!(confRecHit.rawId()>0))
             {
               hitsVFATdenom->Fill(iPhi-1,mRoll-1,index);
               denom2DPerLayer->Fill(gtrp.x(),mRoll-1,index%10);

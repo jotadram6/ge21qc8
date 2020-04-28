@@ -27,7 +27,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "Geometry/GEMGeometry/interface/GEMChamber.h"
 #include "Geometry/GEMGeometry/interface/GEMSuperChamber.h"
-#include "Geometry/Records/interface/MuonGeometryRecord.h"
+#include "DataFormats/GeometryVector/interface/Point3DBase.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "RecoMuon/CosmicMuonProducer/interface/CosmicMuonSmoother.h"
@@ -43,6 +43,8 @@
 #include <DataFormats/GEMRecHit/interface/GEMRecHitCollection.h>
 #include <DataFormats/TrackingRecHit/interface/TrackingRecHit.h>
 #include <DataFormats/TrackReco/interface/Track.h>
+#include "TrackingTools/GeomPropagators/interface/Propagator.h"
+#include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
 #include <Geometry/GEMGeometry/interface/GEMGeometry.h>
 #include <Geometry/Records/interface/MuonGeometryRecord.h>
 
