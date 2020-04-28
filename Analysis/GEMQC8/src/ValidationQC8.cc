@@ -532,14 +532,14 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
           {
             testTrajHitX[index] = gtrp.x();
             testTrajHitY[index] = gtrp.y();
-        	testTrajHitZ[index] = gtrp.z();
+          	testTrajHitZ[index] = gtrp.z();
 
-        	double a = tsosProp.curvilinearError().matrix()(3,3);
-        	double b = tsosProp.curvilinearError().matrix()(4,4);
-        	double c = tsosProp.curvilinearError().matrix()(4,3);
-        	testTrajHitXerr[index] = sqrt(0.5*(a+b-sqrt((a-b)*(a-b)+4*c*c)));
-        	testTrajHitYerr[index] = sqrt(0.5*(a+b+sqrt((a-b)*(a-b)+4*c*c)));
-        	testTrajHitZerr[index] = 0.0;
+          	double a = tsosProp.curvilinearError().matrix()(3,3);
+          	double b = tsosProp.curvilinearError().matrix()(4,4);
+          	double c = tsosProp.curvilinearError().matrix()(4,3);
+          	testTrajHitXerr[index] = sqrt(0.5*(a+b-sqrt((a-b)*(a-b)+4*c*c)));
+          	testTrajHitYerr[index] = sqrt(0.5*(a+b+sqrt((a-b)*(a-b)+4*c*c)));
+          	testTrajHitZerr[index] = 0.0;
 
             g_nNumTrajHit++;
 
