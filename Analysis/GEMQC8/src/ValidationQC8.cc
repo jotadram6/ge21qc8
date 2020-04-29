@@ -609,7 +609,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
               residualPhi->Fill(confHitGP.x()-gtrp.x());
               residualEta->Fill(confHitGP.y()-gtrp.y());
 
-              associatedHits2DPerLayer->Fill(confHitGP.x(),confHitiEta,index%10);
+              associatedHits2DPerLayer->Fill(confHitGP.x(),confHitiEta-1,index%10);
 
               // to find the non associated hits cluster size
 
