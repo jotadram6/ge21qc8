@@ -202,7 +202,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     trajPhi[i] = trajTheta[i] = -999.9;
     trajX[i] = trajY[i] = trajZ[i] = -999.9;
     trajPx[i] = trajPy[i] = trajPz[i] = -999.9;
-    chi2Traj[i] = 0.0;
+    chi2Traj[i] = -999.9;
     ndofTraj[i] = nRecHitsTraj[i] = 0;
     testTrajHitX[i] = testTrajHitY[i] = testTrajHitZ[i] = -999.9;
     testTrajHitXerr[i] = testTrajHitYerr[i] = testTrajHitZerr[i] = -999.9;
