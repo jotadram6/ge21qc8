@@ -366,7 +366,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
   edm::Handle<std::vector<unsigned int>> seedTypes;
   e.getByToken( this->InputTagToken_TT, seedTypes);
 
-  if ( idxChTraj->size() == 0 ) return;
+  if ( idxChTraj->size() < 4 ) return;
 
   // Get the propagators
 
@@ -407,7 +407,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
       it4++;
     }
 
-    if ( it1 == idxChTraj->end() ) continue;
+    if (it1 == idxChTraj->end()) continue;
 
     const FreeTrajectoryState* ftsAtVtx = bestTraj.geometricalInnermostState().freeState();
 
@@ -501,14 +501,14 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
     int topSeedIndex = findIndex(bestTraj.firstMeasurement().recHit()->detUnit()->geographicalId().rawId());
     int bottomSeedIndex = findIndex(bestTraj.lastMeasurement().recHit()->detUnit()->geographicalId().rawId());
+    int seedsDiffCol = abs(int(topSeedIndex/10.0) - int(bottomSeedIndex/10.0));
 
     if ((vecChamType[index]==1 or vecChamType[index]==2) and
         (mRoll==1 or mRoll==8) and
-        (fabs(atan(gvecTrack.y()/gvecTrack.z()))>0.15)) continue;
+        (fabs(atan(gvecTrack.y()/gvecTrack.z()))>0.05)) continue;
 
-    int seedsDiffCol = abs(int(topSeedIndex/10.0) - int(bottomSeedIndex/10.0));
-
-    if ((tlp.x()<(min_x + 1.5) or tlp.x()>(max_x - 1.5)) and seedsDiffCol!=0) continue;
+    if ((tlp.x()<(min_x + 1.0) or tlp.x()>(max_x - 1.0)) and seedsDiffCol!=0) continue;
+    if ((tlp.x()<(min_x + 0.5) or tlp.x()>(max_x - 0.5)) and (vecChamType[index]==1 or vecChamType[index]==2)) continue;
 
     bool validEvent = true;
     for (unsigned int i = 0; i < beginTripEvt[index].size(); i++)
@@ -556,9 +556,9 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
           // Non associated hits? Fill and continue
 
-          if (fabs(hitGP.x() - gtrp.x()) > maxRes or fabs(hitiEta - mRoll) > 1)
+          if (fabs(hitGP.x() - gtrp.x()) > maxRes or abs(hitiEta - mRoll) > 1)
           {
-            if (fabs(hitiEta - mRoll) > 0)
+            if (abs(hitiEta - mRoll) > 1)
             {
               nonAssociatedHitsClusterSize->Fill(hitCh,8-hitiEta+8*(hitiPhi-1),(*hit).clusterSize());
               nonAssociatedHits2DPerLayer->Fill(hitGP.x(),hitiEta-1,index%10);
