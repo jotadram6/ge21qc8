@@ -28,8 +28,6 @@
 
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 
-#include "RecoMuon/CosmicMuonProducer/interface/HeaderForQC8.h"
-
 using namespace std;
 
 class GEMCosmicMuonForQC8 : public edm::stream::EDProducer<> {
@@ -55,9 +53,8 @@ private:
   MuonServiceProxy* theService;
   KFUpdator* theUpdator;
   int findSeeds(std::vector<TrajectorySeed> *tmptrajectorySeeds,
-    MuonTransientTrackingRecHit::MuonRecHitContainer &seedupRecHits,
-    MuonTransientTrackingRecHit::MuonRecHitContainer &seeddnRecHits,
-    std::vector<unsigned int> &vecunInfoSeeds);
+                MuonTransientTrackingRecHit::MuonRecHitContainer &seedupRecHits,
+                MuonTransientTrackingRecHit::MuonRecHitContainer &seeddnRecHits);
   Trajectory makeTrajectory(TrajectorySeed seed, MuonTransientTrackingRecHit::MuonRecHitContainer &muRecHits, std::vector<GEMChamber> gemChambers, GEMChamber testChamber);
   const GEMGeometry* gemGeom;
   int nev;
@@ -91,7 +88,6 @@ GEMCosmicMuonForQC8::GEMCosmicMuonForQC8(const edm::ParameterSet& ps) : iev(0) {
   produces<vector<Trajectory> >();
   produces<vector<TrajectorySeed> >();
   produces<vector<int> >();
-  produces<vector<unsigned int> >();
   printf("End of GEMCosmicMuonForQC8::GEMCosmicMuonForQC8() at %s\n", asctime(localtime(&rawTime)));
 }
 
@@ -106,7 +102,6 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
   unique_ptr<vector<Trajectory> >             trajectorys( new vector<Trajectory>() );
   unique_ptr<vector<TrajectorySeed> >         trajectorySeeds( new vector<TrajectorySeed>() );
   unique_ptr<vector<int> >                    trajectoryChIdx( new vector<int>() );
-  unique_ptr<vector<unsigned int> >           trajectoryType( new vector<unsigned int>() );
   unique_ptr<vector<double> >                 trajectorySeedsHits( new vector<double>() );
   TrackingRecHitRef::key_type recHitsIndex = 0;
   TrackingRecHitRefProd recHitCollectionRefProd = ev.getRefBeforePut<TrackingRecHitCollection>();
@@ -125,10 +120,10 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
   const std::vector<const GEMSuperChamber*>& superChambers_ = mgeom->superChambers();
   for (auto sch : superChambers_)
   {
-	int n_lay = sch->nChambers();
+    int n_lay = sch->nChambers();
     for (int l=0;l<n_lay;l++)
-   	{
-	  gemChambers.push_back(*sch->chamber(l+1));
+    {
+      gemChambers.push_back(*sch->chamber(l+1));
     }
   }
 
@@ -144,50 +139,49 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
     ev.put(std::move(trackExtraCollection));
     ev.put(std::move(trajectorys));
     ev.put(std::move(trajectoryChIdx));
-    ev.put(std::move(trajectoryType));
     return;
   }
 
   int countTC = 0;
 
   // Get the events when a chamber was tripping
-	string delimiter = "";
-	string line = "";
-	string interval = "";
-	int ch, beginEvt, endEvt;
-	vector<int> beginTripEvt[30];
-	vector<int> endTripEvt[30];
-	for (unsigned int i = 0; i < TripEventsPerCh.size(); i++)
-	{
-		line = TripEventsPerCh[i];
+  string delimiter = "";
+  string line = "";
+  string interval = "";
+  int ch, beginEvt, endEvt;
+  vector<int> beginTripEvt[30];
+  vector<int> endTripEvt[30];
+  for (unsigned int i = 0; i < TripEventsPerCh.size(); i++)
+  {
+    line = TripEventsPerCh[i];
 
-		delimiter = ",";
-		ch = stoi(line.substr(0, line.find(delimiter)));
-		line.erase(0, line.find(delimiter) + delimiter.length());
+    delimiter = ",";
+    ch = stoi(line.substr(0, line.find(delimiter)));
+    line.erase(0, line.find(delimiter) + delimiter.length());
 
-		int numberOfIntervals = count(line.begin(), line.end(), ',') + 1; // intervals are number of separators + 1
-		for (int badInterv = 0; badInterv < numberOfIntervals; badInterv++)
-		{
-			delimiter = ",";
-			interval = line.substr(0, line.find(delimiter));
-			delimiter = "-";
-			beginEvt = stoi(interval.substr(0, interval.find(delimiter)));
-			interval.erase(0, interval.find(delimiter) + delimiter.length());
-			endEvt = stoi(interval);
-			if (beginEvt < endEvt)
-			{
-				beginTripEvt[ch].push_back(beginEvt);
-				endTripEvt[ch].push_back(endEvt);
-			}
-			if (endEvt < beginEvt)
-			{
-				beginTripEvt[ch].push_back(endEvt);
-				endTripEvt[ch].push_back(beginEvt);
-			}
-			delimiter = ",";
-			line.erase(0, line.find(delimiter) + delimiter.length());
-		}
-	}
+    int numberOfIntervals = count(line.begin(), line.end(), ',') + 1; // intervals are number of separators + 1
+    for (int badInterv = 0; badInterv < numberOfIntervals; badInterv++)
+    {
+      delimiter = ",";
+      interval = line.substr(0, line.find(delimiter));
+      delimiter = "-";
+      beginEvt = stoi(interval.substr(0, interval.find(delimiter)));
+      interval.erase(0, interval.find(delimiter) + delimiter.length());
+      endEvt = stoi(interval);
+      if (beginEvt < endEvt)
+      {
+        beginTripEvt[ch].push_back(beginEvt);
+        endTripEvt[ch].push_back(endEvt);
+      }
+      if (endEvt < beginEvt)
+      {
+        beginTripEvt[ch].push_back(endEvt);
+        endTripEvt[ch].push_back(beginEvt);
+      }
+      delimiter = ",";
+      line.erase(0, line.find(delimiter) + delimiter.length());
+    }
+  }
 
   for (auto tch : gemChambers)
   {
@@ -209,7 +203,7 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
     {
       if (tch == ch) continue;
 
-  		int index = ch.id().chamber() + ch.id().layer() - 2;
+      int index = ch.id().chamber() + ch.id().layer() - 2;
 
       bool validEvent = true;
       for (unsigned int i = 0; i < beginTripEvt[index].size(); i++)
@@ -256,14 +250,12 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
 
     vector<TrajectorySeed> trajSeedsBody;
     std::vector<TrajectorySeed> *trajSeeds = &trajSeedsBody;
-    std::vector<uint32_t> vecunInfoSeeds;
-    findSeeds(trajSeeds, seedupRecHits, seeddnRecHits, vecunInfoSeeds);
+    findSeeds(trajSeeds, seedupRecHits, seeddnRecHits);
     Trajectory bestTrajectory;
     TrajectorySeed bestSeed;
 
     float maxChi2 = 10000000.0;
     int countTR = 0;
-    int nIdxBest = -1;
 
     for (auto seed : *trajSeeds)
     {
@@ -280,7 +272,6 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
           maxChi2 = dProbChiNDF;
           bestTrajectory = smoothed;
           bestSeed = seed;
-          nIdxBest = countTR - 1;
         }
       }
     }
@@ -366,7 +357,6 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
     trajectorys->push_back(bestTrajectory);
     trajectorySeeds->push_back(bestSeed);
     trajectoryChIdx->push_back(countTC);
-    trajectoryType->push_back(vecunInfoSeeds[ nIdxBest ]);
   }
 
   // fill the collection
@@ -377,14 +367,12 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
   ev.put(std::move(trackExtraCollection));
   ev.put(std::move(trajectorys));
   ev.put(std::move(trajectoryChIdx));
-  ev.put(std::move(trajectoryType));
 
 }
 
 int GEMCosmicMuonForQC8::findSeeds(std::vector<TrajectorySeed> *tmptrajectorySeeds,
-    MuonTransientTrackingRecHit::MuonRecHitContainer &seedupRecHits,
-    MuonTransientTrackingRecHit::MuonRecHitContainer &seeddnRecHits,
-    std::vector<unsigned int> &vecunInfoSeeds)
+                                   MuonTransientTrackingRecHit::MuonRecHitContainer &seedupRecHits,
+                                   MuonTransientTrackingRecHit::MuonRecHitContainer &seeddnRecHits)
 {
   for (auto hit1 : seeddnRecHits){
     for (auto hit2 : seedupRecHits){
@@ -415,28 +403,7 @@ int GEMCosmicMuonForQC8::findSeeds(std::vector<TrajectorySeed> *tmptrajectorySee
 
         TrajectorySeed seed(seedTSOS,seedHits,alongMomentum);
 
-        uint32_t unInfoSeeds = 0;
-
-        GEMDetId detId1(hit1->rawId()), detId2(hit2->rawId());
-        uint32_t unChNo1 = detId1.chamber()+detId1.layer()-1;
-        uint32_t unChNo2 = detId2.chamber()+detId2.layer()-1;
-
-        uint32_t unRoll1 = detId1.roll(), unRoll2 = detId2.roll();
-
-        uint32_t unCol1 = ( unChNo1 - 1 ) / 10, unCol2 = ( unChNo2 - 1 ) / 10;
-        uint32_t unDiffCol = (uint32_t)abs(( (int32_t)unCol1 ) - ( (int32_t)unCol2 ));
-
-        unInfoSeeds |= ( unDiffCol  ) << QC8FLAG_SEEDINFO_SHIFT_DIFFCOL;
-
-        uint32_t unIsForRef = ( g_vecChamType[ unChNo1 - 1 ] == 3 || g_vecChamType[ unChNo2 - 1 ] == 4 ? 1 : 0 );
-
-        if ( unIsForRef == 1 && ( ( unRoll1 == 1 && unRoll2 == 1 ) || ( unRoll1 == 8 && unRoll2 == 8 ) ) )
-        {
-          unInfoSeeds |= QC8FLAG_SEEDINFO_MASK_REFVERTROLL18;
-        }
-
         tmptrajectorySeeds->push_back(seed);
-        vecunInfoSeeds.push_back(unInfoSeeds);
       }
     }
   }

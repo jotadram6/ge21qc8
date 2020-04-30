@@ -25,7 +25,6 @@
 #include "FWCore/Framework/interface/stream/EDProducer.h"
 #include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
-#include "RecoMuon/CosmicMuonProducer/interface/HeaderForQC8.h"
 #include <iomanip>
 #include <TCanvas.h>
 #include <Math/Vector3D.h>

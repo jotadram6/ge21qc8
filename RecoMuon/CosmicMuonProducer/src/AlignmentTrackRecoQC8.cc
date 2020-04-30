@@ -22,7 +22,6 @@
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
 #include "TrackingTools/KalmanUpdators/interface/KFUpdator.h"
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
-#include "RecoMuon/CosmicMuonProducer/interface/HeaderForQC8.h"
 #include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
 
 using namespace std;

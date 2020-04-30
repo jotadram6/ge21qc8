@@ -46,8 +46,6 @@
 #include <Geometry/GEMGeometry/interface/GEMGeometry.h>
 #include <Geometry/Records/interface/MuonGeometryRecord.h>
 
-#include "RecoMuon/CosmicMuonProducer/interface/HeaderForQC8.h"
-
 #include <algorithm>
 #include <iomanip>
 
