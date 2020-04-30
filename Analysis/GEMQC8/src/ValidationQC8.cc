@@ -366,7 +366,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
   edm::Handle<std::vector<unsigned int>> seedTypes;
   e.getByToken( this->InputTagToken_TT, seedTypes);
 
-  if ( idxChTraj->size() < 4 ) return;
+  if (idxChTraj->size() == 0) return;
 
   // Get the propagators
 
