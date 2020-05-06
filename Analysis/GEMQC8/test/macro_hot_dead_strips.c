@@ -82,7 +82,7 @@ void macro_hot_dead_strips(int run, string configDir)
   for (int ch=0; ch<30; ch++)
   {
     sprintf(name,"DigisPerStrip_ch_%u",ch);
-    digisPerStripPerCh[ch] = new TH1D(name,"",max_digi_occupancy[ch],0,max_digi_occupancy[ch]);
+    digisPerStripPerCh[ch] = new TH1D(name,"",int(max_digi_occupancy[ch]/7),0,max_digi_occupancy[ch]);
 
     for (int eta=0; eta<8; eta++)
     {
@@ -164,27 +164,15 @@ void macro_hot_dead_strips(int run, string configDir)
     digisPerStripPerCh[c]->GetYaxis()->SetTitle("Counts");
     digisPerStripPerCh[c]->Draw();
 
-    int npeaks=20;
-    TSpectrum *s = new TSpectrum(npeaks);
-    int nfound = s->Search(digisPerStripPerCh[c]);
-    double *x_peak;
-    x_peak = s->GetPositionX();
+    digisPerStripPerCh[c]->GetXaxis()->SetRangeUser(0,20000);
 
-    float centroid_peak = 0;
-
-    for (int pk = 0; pk < npeaks; pk++)
-    {
-      centroid_peak += x_peak[pk];
-    }
-
-    centroid_peak = centroid_peak/npeaks;
-
-    TF1 *GaussFit = new TF1("GaussFit","gaus",1,centroid_peak+1000.0);
-    digisPerStripPerCh[c]->Fit(GaussFit,"RQ");
+    TF1 *GaussFit = new TF1("GaussFit","gausn",digisPerStripPerCh[c]->GetMean()-3*digisPerStripPerCh[c]->GetStdDev(),digisPerStripPerCh[c]->GetMean()+3*digisPerStripPerCh[c]->GetStdDev());
     digisPerStripPerCh[c]->Fit(GaussFit,"RQ");
     digisPerStripPerCh[c]->Fit(GaussFit,"RQ");
     digisPerStripPerCh[c]->Fit(GaussFit,"RQ");
     GaussFit->Draw("SAME");
+
+    digisPerStripPerCh[c]->GetXaxis()->SetRangeUser(0,max_digi_occupancy[c]);
 
     if ( (GaussFit->GetParameter(1) + nsigmas*GaussFit->GetParameter(2)) > 0 )
     	HotStripLimitValue[c] = int(GaussFit->GetParameter(1) + nsigmas*GaussFit->GetParameter(2)); // Centroid of the gaussian + n sigmas
