@@ -23,7 +23,7 @@ options.register("runNum",run_number,
                  VarParsing.VarParsing.varType.int,
                  "Run number")
 
-options.register("eventsPerJob",1500000,
+options.register("eventsPerJob",-1,
                  VarParsing.VarParsing.multiplicity.singleton,
                  VarParsing.VarParsing.varType.int,
                  "The number of events (in each file)")
