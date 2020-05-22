@@ -254,13 +254,10 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
     TrajectorySeed bestSeed;
 
     float maxChi2 = 10000000.0;
-    int countTR = 0;
 
     for (auto seed : *trajSeeds)
     {
       Trajectory smoothed = makeTrajectory(seed, muRecHits, gemChambers);
-
-      countTR += 1;
 
       if (smoothed.isValid())
       {
