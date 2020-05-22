@@ -33,7 +33,7 @@ def align_stopper(run_number, step):
           line = line.split('\n')[0]
         if ('\r' in line):
           line = line.split('\r')[0]
-        if (line.split(',')[0]=='RunNumber' and line.split(',')[1]!=run_number):
+        if (line.split(',')[0]=='RunNumber' and int(line.split(',')[1])!=int(run_number)):
           sys.exit('StandAlignmentValues file has something wrong: run rumber not matching...')
         if (line.split(',')[0]!='RunNumber' and line.split(',')[0]!='Position'):
           dx.append(float(line.split(',')[1]))
