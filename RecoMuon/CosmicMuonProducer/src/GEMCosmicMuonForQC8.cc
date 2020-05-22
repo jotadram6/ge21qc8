@@ -55,10 +55,9 @@ private:
   int findSeeds(std::vector<TrajectorySeed> *tmptrajectorySeeds,
                 MuonTransientTrackingRecHit::MuonRecHitContainer &seedupRecHits,
                 MuonTransientTrackingRecHit::MuonRecHitContainer &seeddnRecHits);
-  Trajectory makeTrajectory(TrajectorySeed seed, MuonTransientTrackingRecHit::MuonRecHitContainer &muRecHits, std::vector<GEMChamber> gemChambers, GEMChamber testChamber);
+  Trajectory makeTrajectory(TrajectorySeed seed, MuonTransientTrackingRecHit::MuonRecHitContainer &muRecHits, std::vector<GEMChamber> gemChambers);
   const GEMGeometry* gemGeom;
   int nev;
-  bool checkCrossSeeds = false;
 };
 
 GEMCosmicMuonForQC8::GEMCosmicMuonForQC8(const edm::ParameterSet& ps) : iev(0) {
@@ -259,7 +258,7 @@ void GEMCosmicMuonForQC8::produce(edm::Event& ev, const edm::EventSetup& setup)
 
     for (auto seed : *trajSeeds)
     {
-      Trajectory smoothed = makeTrajectory(seed, muRecHits, gemChambers,tch);
+      Trajectory smoothed = makeTrajectory(seed, muRecHits, gemChambers);
 
       countTR += 1;
 
@@ -412,7 +411,7 @@ int GEMCosmicMuonForQC8::findSeeds(std::vector<TrajectorySeed> *tmptrajectorySee
 }
 
 
-Trajectory GEMCosmicMuonForQC8::makeTrajectory(TrajectorySeed seed, MuonTransientTrackingRecHit::MuonRecHitContainer &muRecHits, std::vector<GEMChamber> gemChambers, GEMChamber testChamber)
+Trajectory GEMCosmicMuonForQC8::makeTrajectory(TrajectorySeed seed, MuonTransientTrackingRecHit::MuonRecHitContainer &muRecHits, std::vector<GEMChamber> gemChambers)
 {
   PTrajectoryStateOnDet ptsd1(seed.startingState());
   DetId did(ptsd1.detId());
