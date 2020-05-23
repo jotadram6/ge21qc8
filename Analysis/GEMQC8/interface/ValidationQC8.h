@@ -56,7 +56,6 @@
 #include <TCanvas.h>
 #include <TMath.h>
 
-
 class ValidationQC8 : public GEMBaseValidation
 {
 public:
@@ -129,7 +128,6 @@ private:
   float testTrajHitZ[30];
   float testTrajHitXerr[30];
   float testTrajHitYerr[30];
-  float testTrajHitZerr[30];
   float confTestHitX[30];
   float confTestHitY[30];
   float confTestHitZ[30];

@@ -93,7 +93,6 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("confTestHitiPhi",&confTestHitiPhi,"confTestHitiPhi[30]/I");
   tree->Branch("confTestHitiEta",&confTestHitiEta,"confTestHitiEta[30]/I");
 
-
   if (isMC)
   {
     // Tree for gen events
@@ -115,9 +114,6 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
 }
 
 void ValidationQC8::bookHistograms(DQMStore::IBooker & ibooker, edm::Run const & Run, edm::EventSetup const & iSetup ) {
-  time_t rawTime;
-  time(&rawTime);
-  printf("Begin of ValidationQC8::bookHistograms() at %s\n", asctime(localtime(&rawTime)));
   GEMGeometry_ = initGeometry(iSetup);
   if ( GEMGeometry_ == nullptr) return ;
 
@@ -131,13 +127,9 @@ void ValidationQC8::bookHistograms(DQMStore::IBooker & ibooker, edm::Run const &
     }
   }
   n_ch = gemChambers.size();
-  time(&rawTime);
-
-  printf("End of ValidationQC8::bookHistograms() at %s\n", asctime(localtime(&rawTime)));
 }
 
-int ValidationQC8::findIndex(GEMDetId id_)
-{
+int ValidationQC8::findIndex(GEMDetId id_) {
   return id_.chamberId().chamber()+id_.chamberId().layer()-2;
 }
 
@@ -205,7 +197,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     chi2Traj[i] = -999.9;
     ndofTraj[i] = nRecHitsTraj[i] = 0;
     testTrajHitX[i] = testTrajHitY[i] = testTrajHitZ[i] = -999.9;
-    testTrajHitXerr[i] = testTrajHitYerr[i] = testTrajHitZerr[i] = -999.9;
+    testTrajHitXerr[i] = testTrajHitYerr[i] = -999.9;
     confTestHitX[i] = confTestHitY[i] = confTestHitZ[i] = -999.9;
     confTestHitXerr[i] = confTestHitYerr[i] = -999.9;
     confTestHitiEta[i] = confTestHitiPhi[i] = confTestHitClSize[i] = -1;
@@ -530,7 +522,6 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
       double c = tsosProp.curvilinearError().matrix()(4,3);
       testTrajHitXerr[index] = sqrt(0.5*(a+b-sqrt((a-b)*(a-b)+4*c*c)));
       testTrajHitYerr[index] = sqrt(0.5*(a+b+sqrt((a-b)*(a-b)+4*c*c)));
-      testTrajHitZerr[index] = 0.0;
 
       g_nNumTrajHit++;
 
