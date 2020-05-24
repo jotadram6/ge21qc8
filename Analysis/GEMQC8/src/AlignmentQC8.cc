@@ -32,20 +32,12 @@ AlignmentQC8::AlignmentQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cfg)
 
   goodVStriggeredEvts = fs->make<TH1D>("goodVStriggeredEvts","Events with track vs triggered events",2,0,2);
   string name = "";
-  for(int i = 0; i < 15; i++) // SuperChamber#
+  for(int i = 0; i < 15; i++) // SuperChamber position 0-14
   {
     for(int j = 0; j < 8; j++) // iEta
     {
       name = Form("h_resX_eta_%d_%d",i+1,j+1);
-      h_resX_eta[i][j] = fs->make<TH1D>(name.c_str(),name.c_str(),200,-3.0,3.0);
-    }
-  }
-  for(int i = 0; i<3; i++) // column number
-  {
-    for(int j=0;j<8;j++) // iEta
-    {
-      name = Form("h_PxPz_col_eta_%d_%d",i+1,j+1);
-      h_PxPz_col_eta[i][j] = fs->make<TH1D>(name.c_str(),name.c_str(),500,-0.05,0.05);
+      h_resX_eta[i][j] = fs->make<TH1D>(name.c_str(),name.c_str(),400,-3.0,3.0);
     }
   }
 
@@ -289,11 +281,7 @@ void AlignmentQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
       confTestHitXerr[index] = confRecHit.localPositionError().xx();
       confTestHitYerr[index] = confRecHit.localPositionError().yy();
 
-      if (fabs(trajPy)<0.03)
-      {
-        h_resX_eta[int(index/2)][confHitiEta-1]->Fill(confHitGP.x()-gtrp.x());
-        h_PxPz_col_eta[int(index/10)][confHitiEta-1]->Fill(trajPx/trajPz);
-      }
+      if (fabs(trajPy)<0.03) h_resX_eta[int(index/2)][confHitiEta-1]->Fill(confHitGP.x()-gtrp.x());
     }
   }
   tree->Fill();

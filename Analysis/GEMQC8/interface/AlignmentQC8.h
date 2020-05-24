@@ -83,7 +83,6 @@ private:
 
 	TH1D *goodVStriggeredEvts;
 	TH1D *h_resX_eta[15][8]; // 15 SC max, 8 ieta
-	TH1D *h_PxPz_col_eta[3][8]; // 3 columns, 8 ieta
 
 	TTree *tree;
   int run;
