@@ -83,7 +83,6 @@ ValidationQC8::ValidationQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cf
   tree->Branch("testTrajHitZ",&testTrajHitZ,"testTrajHitZ[30]/F");
   tree->Branch("testTrajHitXerr",&testTrajHitXerr,"testTrajHitXerr[30]/F");
   tree->Branch("testTrajHitYerr",&testTrajHitYerr,"testTrajHitYerr[30]/F");
-  tree->Branch("testTrajHitZerr",&testTrajHitZerr,"testTrajHitZerr[30]/F");
   tree->Branch("confTestHitX",&confTestHitX,"confTestHitX[30]/F");
   tree->Branch("confTestHitY",&confTestHitY,"confTestHitY[30]/F");
   tree->Branch("confTestHitZ",&confTestHitZ,"confTestHitZ[30]/F");
