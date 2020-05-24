@@ -1,37 +1,7 @@
 #include "Analysis/GEMQC8/interface/AlignmentQC8.h"
-#include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
-#include "MagneticField/Engine/interface/MagneticField.h"
-#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
-#include "Geometry/GEMGeometry/interface/GEMSuperChamber.h"
-#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
-#include "Geometry/Records/interface/MuonGeometryRecord.h"
-#include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/GeometrySurface/interface/Bounds.h"
-#include "DataFormats/GeometrySurface/interface/TrapezoidalPlaneBounds.h"
-#include "DataFormats/GeometryVector/interface/LocalPoint.h"
-#include "DataFormats/GeometryVector/interface/GlobalPoint.h"
-#include "DataFormats/TrajectorySeed/interface/PropagationDirection.h"
-#include "DataFormats/Math/interface/Vector.h"
-#include "DataFormats/Math/interface/Point3D.h"
-#include "DataFormats/Common/interface/RefToBase.h"
-#include "DataFormats/TrajectoryState/interface/PTrajectoryStateOnDet.h"
-#include "TrackingTools/TrajectoryState/interface/TrajectoryStateTransform.h"
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "DataFormats/TrajectorySeed/interface/TrajectorySeed.h"
-#include "DataFormats/TrackingRecHit/interface/TrackingRecHit.h"
-#include "RecoMuon/TransientTrackingRecHit/interface/MuonTransientTrackingRecHit.h"
-#include "RecoMuon/TrackingTools/interface/MuonServiceProxy.h"
-#include "FWCore/Framework/interface/stream/EDProducer.h"
-#include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
-#include "SimDataFormats/GeneratorProducts/interface/HepMCProduct.h"
-#include <iomanip>
-#include <TCanvas.h>
-#include <Math/Vector3D.h>
 
 using namespace std;
 using namespace edm;
-using namespace ROOT::Math;
 
 AlignmentQC8::AlignmentQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cfg)
 {
@@ -53,75 +23,71 @@ AlignmentQC8::AlignmentQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cfg)
   maxRes = cfg.getParameter<double>("maxResidual");
   SuperChamType = cfg.getParameter<vector<string>>("SuperChamberType");
   vecChamType = cfg.getParameter<vector<double>>("SuperChamberSeedingLayers");
-  shiftX = cfg.getParameter<vector<double>>("shiftX");
-  rotationZ = cfg.getParameter<vector<double>>("rotationZ");
-  trueDx = cfg.getParameter<vector<double>>("trueDx");
-  trueRz = cfg.getParameter<vector<double>>("trueRz");
   edm::ParameterSet smootherPSet = cfg.getParameter<edm::ParameterSet>("MuonSmootherParameters");
   theSmoother = new CosmicMuonSmoother(smootherPSet, theService);
   theUpdator = new KFUpdator();
   time(&rawTime);
 
   edm::Service<TFileService> fs;
-  hev = fs->make<TH1D>("hev","EventSummary",2,0,2);
-  tree = fs->make<TTree>("tree", "Tree for QC8");
-  tree->Branch("run",&run,"run/I");
-  tree->Branch("lumi",&lumi,"lumi/I");
-  tree->Branch("ev",&nev,"ev/I");
-  // Reconstructed track info
-  tree->Branch("trajTheta",&trajTheta,"trajTheta/F");
-  tree->Branch("trajPhi",&trajPhi,"trajPhi/F");
-  tree->Branch("trajX",&trajX,"trajX/F");
-  tree->Branch("trajY",&trajY,"trajY/F");
-  tree->Branch("trajZ",&trajZ,"trajZ/F");
-  tree->Branch("trajPx",&trajPx,"trajPx/F");
-  tree->Branch("trajPy",&trajPy,"trajPy/F");
-  tree->Branch("trajPz",&trajPz,"trajPz/F");
-  tree->Branch("trajChi2",&trajChi2,"trajChi2/F");
-  tree->Branch("SchSeed",SchSeed,"SchSeed[2]/I");
-  // Hit of the track on the chamber
-  tree->Branch("chTrajHitX",chTrajHitX,"chTrajHitX[30]/F");
-  tree->Branch("chTrajHitY",chTrajHitY,"chTrajHitY[30]/F");
-  tree->Branch("chTrajHitZ",chTrajHitZ,"chTrajHitZ[30]/F");
-  // Reconstructed hit on the chamber
-  tree->Branch("chRecHitX",chRecHitX,"chRecHitX[30]/F");
-  tree->Branch("chRecHitY",chRecHitY,"chRecHitY[30]/F");
-  tree->Branch("chRecHitZ",chRecHitZ,"chRecHitZ[30]/F");
-  // Correction factor
-  tree->Branch("dx",dx,"dx[30]/F");
-  tree->Branch("rz",rz,"rz[30]/F");
-  if(isMC)
+
+  // Histograms declaration
+
+  goodVStriggeredEvts = fs->make<TH1D>("goodVStriggeredEvts","Events with track vs triggered events",2,0,2);
+  string name = "";
+  for(int i = 0; i < 15; i++) // SuperChamber#
   {
-    tree->Branch("tDx",tDx,"tDx[30]/F");
-    tree->Branch("tRz",tRz,"tRz[30]/F");
-  }
-  //Booking histograms for residuals per superchamber per etapartition
-  int SC = 15;
-  for(int i = 0; i<SC; i++)
-  {
-    for(int j=0;j<8;j++) // iEta
+    for(int j = 0; j < 8; j++) // iEta
     {
-      TString hname = Form("hchEtaResidualX_%d_%d",i+1,j+1);
-      TString chTitle = Form("residualX of %d/%d_%d",(i)%5+1,i/5+1,j+1);
-      hchEtaResidualX[i][j] = fs->make<TH1D>(hname,chTitle,200,-3.0,3.0);
+      name = Form("h_resX_eta_%d_%d",i+1,j+1);
+      h_resX_eta[i][j] = fs->make<TH1D>(name.c_str(),name.c_str(),200,-3.0,3.0);
     }
   }
   for(int i = 0; i<3; i++) // column number
   {
     for(int j=0;j<8;j++) // iEta
     {
-      TString hname = Form("hColEtaPxPz_%d_%d",i+1,j+1);
-      TString chTitle = Form("Angular distribution (Px/Pz) Column %d iEta%d",i+1,j+1);
-      hColEtaPyPz[i][j] = fs->make<TH1D>(hname,chTitle,500,-0.05,0.05);
+      name = Form("h_PxPz_col_eta_%d_%d",i+1,j+1);
+      h_PxPz_col_eta[i][j] = fs->make<TH1D>(name.c_str(),name.c_str(),500,-0.05,0.05);
     }
   }
 
+  // Tree branches declaration
+
+  tree = fs->make<TTree>("tree", "Tree for QC8");
+  tree->Branch("run",&run,"run/I");
+  tree->Branch("lumi",&lumi,"lumi/I");
+  tree->Branch("ev",&nev,"ev/I");
+  tree->Branch("trajPhi",&trajPhi,"trajPhi/F");
+  tree->Branch("trajTheta",&trajTheta,"trajTheta/F");
+  tree->Branch("trajX",&trajX,"trajX/F");
+  tree->Branch("trajY",&trajY,"trajY/F");
+  tree->Branch("trajZ",&trajZ,"trajZ/F");
+  tree->Branch("trajPx",&trajPx,"trajPx/F");
+  tree->Branch("trajPy",&trajPy,"trajPy/F");
+  tree->Branch("trajPz",&trajPz,"trajPz/F");
+  tree->Branch("nRecHitsTraj",&nRecHitsTraj,"nRecHitsTraj/I");
+  tree->Branch("chi2Traj",&chi2Traj,"chi2Traj/F");
+  tree->Branch("ndofTraj",&ndofTraj,"ndofTraj/I");
+  tree->Branch("testTrajHitX",&testTrajHitX,"testTrajHitX[30]/F");
+  tree->Branch("testTrajHitY",&testTrajHitY,"testTrajHitY[30]/F");
+  tree->Branch("testTrajHitZ",&testTrajHitZ,"testTrajHitZ[30]/F");
+  tree->Branch("testTrajHitXerr",&testTrajHitXerr,"testTrajHitXerr[30]/F");
+  tree->Branch("testTrajHitYerr",&testTrajHitYerr,"testTrajHitYerr[30]/F");
+  tree->Branch("confTestHitX",&confTestHitX,"confTestHitX[30]/F");
+  tree->Branch("confTestHitY",&confTestHitY,"confTestHitY[30]/F");
+  tree->Branch("confTestHitZ",&confTestHitZ,"confTestHitZ[30]/F");
+  tree->Branch("confTestHitXerr",&confTestHitXerr,"confTestHitXerr[30]/F");
+  tree->Branch("confTestHitYerr",&confTestHitYerr,"confTestHitYerr[30]/F");
+  tree->Branch("confTestHitClSize",&confTestHitClSize,"confTestHitClSize[30]/I");
+  tree->Branch("confTestHitiEta",&confTestHitiEta,"confTestHitiEta[30]/I");
+
+  printf("End of AlignmentQC8::AlignmentQC8() at %s\n", asctime(localtime(&rawTime)));
 }
 
 void AlignmentQC8::bookHistograms(DQMStore::IBooker & ibooker, edm::Run const & Run, edm::EventSetup const & iSetup ) {
-  // Importing geometry
   GEMGeometry_ = initGeometry(iSetup);
   if ( GEMGeometry_ == nullptr) return ;
+
   const std::vector<const GEMSuperChamber*>& superChambers_ = GEMGeometry_->superChambers();
   for (auto sch : superChambers_)
   {
@@ -159,67 +125,39 @@ AlignmentQC8::~AlignmentQC8() {
 }
 
 void AlignmentQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
-  bool debug = false;
-  time_t rawTime;
-  time(&rawTime);
-  //  printf("Starting the analyze loop at %s\n", asctime(localtime(&rawTime)));
 
   run = e.id().run();
   lumi = e.id().luminosityBlock();
   nev = e.id().event();
-  hev->Fill(0);
 
-  for(int i=0;i<maxNlayer;i++) //loop over the layers of each superchambers
+  goodVStriggeredEvts->Fill(0);
+
+  for(int i=0;i<30;i++) //loop over the layers of each superchambers
   {
-    chTrajHitX[i] = -999.0;
-    chTrajHitY[i] = -999.0;
-    chTrajHitZ[i] = -999.0;
-    chRecHitX[i] = -999.0;
-    chRecHitY[i] = -999.0;
-    chRecHitZ[i] = -999.0;
-    int n = int(i/2);
-    dx[i] = shiftX[n];
-    rz[i] = rotationZ[n];
-    tDx[i] = trueDx[n];
-    tRz[i] = trueRz[n];
+    testTrajHitX[i] = testTrajHitY[i] = testTrajHitZ[i] = -999.9;
+    testTrajHitXerr[i] = testTrajHitYerr[i] = -999.9;
+    confTestHitX[i] = confTestHitY[i] = confTestHitZ[i] = -999.9;
+    confTestHitXerr[i] = confTestHitYerr[i] = -999.9;
+    confTestHitClSize[i] = confTestHitiEta[i] = -1;
   }
 
-  trajX = -999.0;
-  trajY = -999.0;
-  trajZ = -999.0;
-  trajPx = -999.0;
-  trajPy = -999.0;
-  trajPz = -999.0;
-  trajTheta = -999.0;
-  trajPhi = -999.0;
-  trajChi2 = -999.0;
+  trajPhi = trajTheta = -999.9;
+  trajX = trajY = trajZ = -999.9;
+  trajPx = trajPy = trajPz = -999.9;
+  chi2Traj = -999.9;
+  ndofTraj = nRecHitsTraj = 0;
 
   theService->update(iSetup);
 
-  //Filtering recHit clustersize
+  // recHits
+
   edm::Handle<GEMRecHitCollection> gemRecHits;
   e.getByToken( this->InputTagToken_RH, gemRecHits);
-  if(gemRecHits->size() <= 4) return;
-  if(debug) cout << "Number of RecHit: " << gemRecHits->size() << endl;
-
-  MuonTransientTrackingRecHit::MuonRecHitContainer testRecHits;
-  for (auto gemch : gemChambers)
+  if (!gemRecHits.isValid())
   {
-    for (auto etaPart : gemch.etaPartitions()){
-      GEMDetId etaPartID = etaPart->id();
-      GEMRecHitCollection::range range = gemRecHits->get(etaPartID);
-      for (GEMRecHitCollection::const_iterator rechit = range.first; rechit!=range.second; ++rechit)
-      {
-        const GeomDet* geomDet(etaPart);
-        if ((*rechit).clusterSize()<minCLS) continue;
-        if ((*rechit).clusterSize()>maxCLS) continue;
-        testRecHits.push_back(MuonTransientTrackingRecHit::specificBuild(geomDet,&*rechit));
-      }
-    }
+    edm::LogError("AlignmentQC8") << "Cannot get strips by Token RecHits Token.\n";
+    return ;
   }
-
-  time(&rawTime);
-  //  printf("RecHit clustersize filtered at %s\n", asctime(localtime(&rawTime)));
 
   edm::Handle<std::vector<int>> idxChTraj;
   e.getByToken( this->InputTagToken_TI, idxChTraj);
@@ -236,155 +174,136 @@ void AlignmentQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
   edm::Handle<std::vector<unsigned int>> seedTypes;
   e.getByToken( this->InputTagToken_TT, seedTypes);
 
-  if(debug) cout << "Event: " << nev << "Number of tracks: " << trackCollection->size()  << endl;
-
   if(trackCollection->size() == 0) return;
 
-  // Getting the seed of the best track
-  std::vector<Trajectory>::const_iterator trackit = trajGCM->begin();
-  Trajectory bestTraj = *trackit;
-  Trajectory::RecHitContainer transHits = bestTraj.recHits();
-  TrajectorySeed bestSeed = (*trackit).seed();
-  TrajectorySeed::range range = bestSeed.recHits();
-  int nseed = 0;
-  for (edm::OwnVector<TrackingRecHit>::const_iterator rechit = range.first; rechit!=range.second; ++rechit)
-  {
-    GEMDetId hitID(rechit->rawId());
-    int nIdxSch = int(hitID.chamber()+hitID.layer()-2)/2;
-    SchSeed[nseed] = nIdxSch;
-    nseed++;
-  }
+  // Get the propagators
 
-  time(&rawTime);
-  //  printf("Best track taken  at %s\n", asctime(localtime(&rawTime)));
+  edm::ESHandle<Propagator> propagatorAlong;
+  edm::ESHandle<Propagator> propagatorOpposite;
+  iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",propagatorAlong);
+  iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",propagatorOpposite);
 
-  //Getting info on reconstructed track
-  PTrajectoryStateOnDet ptsd1(bestSeed.startingState());
-  DetId did(ptsd1.detId());
-  const BoundPlane& bp = theService->trackingGeometry()->idToDet(did)->surface();
-  TrajectoryStateOnSurface tsos = trajectoryStateTransform::transientState(ptsd1,&bp,&*theService->magneticField());
+  // Getting the track info
+
+  TrajectorySeed bestSeed = (*trajGCM->begin()).seed();
+  Trajectory bestTraj = *trajGCM->begin();
+  reco::Track bestTrack = *trackCollection->begin();
+
   const FreeTrajectoryState* ftsAtVtx = bestTraj.geometricalInnermostState().freeState();
-  GlobalPoint trajVertex = ftsAtVtx->position();
-  GlobalVector trajMomentum = ftsAtVtx->momentum();
-  trajX = trajVertex.x();
-  trajY = trajVertex.y();
-  trajZ = trajVertex.z();
-  trajPx = trajMomentum.x();
-  trajPy = trajMomentum.y();
-  trajPz = trajMomentum.z();
-  trajTheta = trajMomentum.theta();
-  trajPhi = trajMomentum.phi();
-  trajChi2 = bestTraj.chiSquared()/float(bestTraj.ndof());
-  /*  cout << "track X= " <<  trajX << " track Y= " <<  trajY << " track Z= " <<  trajZ << endl;
-   cout << "track PX= " <<  trajPx << " track PY= " <<  trajPy << " track PZ= " <<  trajPz << endl;
-   cout << "atan PX/PZ= " <<  (atan2(trajPx,trajPz))*180/3.14  << " track PY= " <<  (atan2(trajPy,trajPz))*180/3.14 << endl;*/
+
+  GlobalPoint trackPCA = ftsAtVtx->position();
+  GlobalVector gvecTrack = ftsAtVtx->momentum();
+
+  trajTheta = gvecTrack.theta();
+  trajPhi = gvecTrack.phi();
+  trajX = trackPCA.x();
+  trajY = trackPCA.y();
+  trajZ = trackPCA.z();
+  trajPx = gvecTrack.x();
+  trajPy = gvecTrack.y();
+  trajPz = gvecTrack.z();
+  nRecHitsTraj = size(bestTraj.recHits());
+  chi2Traj = bestTraj.chiSquared();
+  ndofTraj = bestTraj.ndof();
+
+  FreeTrajectoryState startPoint(bestTraj.lastMeasurement().updatedState().globalParameters().position(),bestTraj.lastMeasurement().updatedState().globalParameters().momentum(),bestTrack.charge(),&*theService->magneticField());
+  startPoint.setCurvilinearError(bestTraj.lastMeasurement().updatedState().curvilinearError());
 
   for(int c=0; c<n_ch;c++)
   {
     GEMChamber ch = gemChambers[c];
-    const BoundPlane& bpch = GEMGeometry_->idToDet(ch.id())->surface();
-    tsos = theService->propagator("SteppingHelixPropagatorAny")->propagate(tsos, bpch);
-    if (!tsos.isValid()) continue;
-    Global3DPoint GlobTrajPos = tsos.freeTrajectoryState()->position();
-    float half_zch = 0.34125;
-    Global3DPoint GlobTrajPos2(trajX + (GlobTrajPos.z() - half_zch - trajZ)*trajPx/trajPz, trajY + (GlobTrajPos.z() - half_zch - trajZ)*trajPy/trajPz, GlobTrajPos.z() - half_zch);
-    Local3DPoint tlp = bpch.toLocal(GlobTrajPos2);
-    if (!bpch.bounds().inside(tlp)) continue;
+
+    int index = findIndex(ch.id());
 
     // Find the ieta partition ( -> mRoll )
 
-    int n_roll = ch.nEtaPartitions();
-    double minDeltaY = 50.;
     int mRoll = -1;
-    for (int r=0; r<n_roll; r++)
+    int n_eta = ch.nEtaPartitions();
+
+    TrajectoryStateOnSurface tsosTestProp;
+    TrajectoryStateOnSurface tsosProp;
+
+    for (int ieta=0; ieta<n_eta and mRoll==-1; ieta++)
     {
-      const BoundPlane& bproll = GEMGeometry_->idToDet(ch.etaPartition(r+1)->id())->surface();
-      Local3DPoint rtlp = bproll.toLocal(GlobTrajPos2);
-      if (minDeltaY > fabs(rtlp.y()))
+      const BoundPlane& bpeta = GEMGeometry_->idToDet(ch.etaPartition(ieta+1)->id())->surface();
+      tsosTestProp = propagatorAlong->propagate(startPoint, bpeta);
+      if (!tsosTestProp.isValid()) tsosTestProp = propagatorOpposite->propagate(startPoint, bpeta);
+      if (!tsosTestProp.isValid()) continue;
+      if (bpeta.bounds().inside(tsosTestProp.localPosition()))
       {
-        minDeltaY = fabs(rtlp.y());
-        mRoll = r+1;
+        mRoll = ieta+1;
+        tsosProp = tsosTestProp;
       }
     }
 
-    if (mRoll == -1)
+    if (mRoll == -1) continue; // The track was not passing through that chamber... (another column, etc...)
+
+    Global3DPoint gtrp = tsosProp.globalPosition();
+
+    testTrajHitX[index] = gtrp.x();
+    testTrajHitY[index] = gtrp.y();
+    testTrajHitZ[index] = gtrp.z();
+
+    double xx = tsosProp.curvilinearError().matrix()(3,3);
+    double yy = tsosProp.curvilinearError().matrix()(4,4);
+    double xy = tsosProp.curvilinearError().matrix()(4,3);
+    testTrajHitXerr[index] = sqrt(0.5*(xx+yy-sqrt((xx-yy)*(xx-yy)+4*xy*xy)));
+    testTrajHitYerr[index] = sqrt(0.5*(xx+yy+sqrt((xx-yy)*(xx-yy)+4*xy*xy)));
+
+    // Check if there's a matching recHit in the test chamber (confRecHit) - confirming recHit. Otherwise put all the other hits outside the range in non asssociated
+
+    GEMRecHit confRecHit;
+
+    double maxR = 99.9;
+
+    for ( GEMRecHitCollection::const_iterator hit = gemRecHits->begin(); hit != gemRecHits->end(); ++hit )
     {
-      cout << "no mRoll" << endl;
-      continue;
-    }
+      // cluster size selection
+      if ((*hit).clusterSize()<minCLS or (*hit).clusterSize()>maxCLS) continue;
 
-    int n_strip = ch.etaPartition(mRoll)->nstrips();
-    double min_x = ch.etaPartition(mRoll)->centreOfStrip(0).x();
-    double max_x = ch.etaPartition(mRoll)->centreOfStrip(n_strip-1).x();
+      GEMDetId hitID((*hit).rawId());
+      int hitCh = findIndex(hitID);
 
-    if ( (tlp.x()>(min_x)) && (tlp.x() < (max_x)) )
-    {
-      int idx = findIndex(ch.id());
-      int imRoll = mRoll - 1;
-      chTrajHitX[idx] = GlobTrajPos2.x();
-      chTrajHitY[idx] = GlobTrajPos2.y();
-      chTrajHitZ[idx] = GlobTrajPos2.z();
-
-      Global3DPoint recHitGP;
-      double maxR = 99.9;
-      shared_ptr<MuonTransientTrackingRecHit> tmpRecHit;
-
-      for (auto hit : testRecHits)
+      if (hitCh == index) // hit in test chamber
       {
-        GEMDetId hitID(hit->rawId());
-        if (hitID.chamberId() != ch.id()) continue;
-        GlobalPoint hitGP = hit->globalPosition();
-        int nIdxSch = int(hitID.chamber()+hitID.layer()-2)/2;
+        GlobalPoint hitGP = GEMGeometry_->idToDet((*hit).gemId())->surface().toGlobal(hit->localPosition());
+        int hitiEta = hitID.roll();
 
-        double Dx = trueDx[nIdxSch];
-        double Rz = trueRz[nIdxSch]; // [degrees]
-        double phi = -Rz*3.14159/180; // [radiants]
+        if (fabs(hitGP.x() - gtrp.x()) > maxRes or abs(hitiEta - mRoll) > 1) continue;
 
-        double Dx2 = shiftX[nIdxSch];
-        double Rz2 = rotationZ[nIdxSch]; // [degrees]
-        double phi2 = Rz2*3.14159/180; // [radiants]
-
-        int columnFactor = nIdxSch/5 - 1;
-        double centerOfColumn = 56;
-        double gx1 = hitGP.x() + centerOfColumn*columnFactor;
-        double gy1 = hitGP.y();
-        double gx2 = gx1*cos(phi+phi2) - gy1*sin(phi+phi2);
-        double Dx_Rz = gx1-gx2;
-        double GPdx = hitGP.x();
-        double GPdy = hitGP.y();
-        double GPdz = hitGP.z();
-
-	hitGP = GlobalPoint(GPdx-Dx+Dx2 -Dx_Rz, GPdy, GPdz);
-
-        if (fabs(hitGP.x() - GlobTrajPos2.x()) > maxRes+0.5) continue;
-        if (abs(hitID.roll() - mRoll)>1) continue;
-
-        double deltaR = (hitGP - GlobTrajPos2).mag();
-        if (maxR > deltaR)
+        // Associated hits? Choosing the closest one
+        double deltaR = (hitGP - gtrp).mag();
+        if (deltaR < maxR)
         {
-          tmpRecHit = hit;
+          confRecHit = *hit;
           maxR = deltaR;
-          recHitGP = hitGP;
         }
       }
-      if(tmpRecHit)
+    }
+
+    if (confRecHit.rawId()>0)
+    {
+      GEMDetId confHitID(confRecHit.rawId());
+      int confHitiEta = confHitID.roll();
+      confTestHitiEta[index] = confHitiEta;
+
+      Global3DPoint confHitGP = GEMGeometry_->idToDet(confRecHit.gemId())->surface().toGlobal(confRecHit.localPosition());
+
+      confTestHitX[index] = confHitGP.x();
+      confTestHitY[index] = confHitGP.y();
+      confTestHitZ[index] = confHitGP.z();
+
+      confTestHitClSize[index] = confRecHit.clusterSize();
+      confTestHitXerr[index] = confRecHit.localPositionError().xx();
+      confTestHitYerr[index] = confRecHit.localPositionError().yy();
+
+      if (fabs(trajPy)<0.03)
       {
-        chRecHitX[idx] = recHitGP.x();
-        chRecHitY[idx] = recHitGP.y();
-        chRecHitZ[idx] = recHitGP.z();
-        if(fabs(atan(trajPy/trajPz))<0.1)
-        {
-          hchEtaResidualX[(int)(idx/2)][imRoll]->Fill(recHitGP.x()- GlobTrajPos2.x());
-          if(fabs(atan(trajPy/trajPz))<0.06) // tracks must pass in the same eta partition for all the chambers in the column
-          {
-            hColEtaPyPz[int(idx/10)][imRoll]->Fill(trajPy/trajPz);
-          }
-        }
+        h_resX_eta[int(index/2)][confHitiEta]->Fill(confHitGP.x()-gtrp.x());
+        h_PxPz_col_eta[int(index/10)][confHitiEta]->Fill(trajPx/trajPz);
       }
     }
   }
-  time(&rawTime);
-  //  printf("Residuals stored at %s\n", asctime(localtime(&rawTime)));
-  hev->Fill(1);
   tree->Fill();
+  goodVStriggeredEvts->Fill(1);
 }

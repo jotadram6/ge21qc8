@@ -70,23 +70,6 @@ for j in range (0,3):
 
 print(SuperChSeedingLayers)
 
-# Alignment of chambers
-trueDx = [0,0,0,0,0,\
-          0,0,0,0,0,\
-          0,0,0,0,0] # cm
-
-trueRz = [0,0,0,0,0,\
-          0,0,0,0,0,\
-          0,0,0,0,0] # degree
-
-shiftX = [0,0,0,0,0,\
-          0,0,0,0,0,\
-          0,0,0,0,0] # cm
-
-rotationZ = [0,0,0,0,0,\
-             0,0,0,0,0,\
-             0,0,0,0,0] # degree
-
 from Configuration.StandardSequences.Eras import eras
 
 process = cms.Process('RECO',eras.phase2_muon)
@@ -231,13 +214,9 @@ process.AlignmentTrackRecoQC8 = cms.EDProducer("AlignmentTrackRecoQC8",
                                                trackResX = cms.double(runConfig.trackResX),
                                                trackResY = cms.double(runConfig.trackResY),
                                                MulSigmaOnWindow = cms.double(runConfig.MulSigmaOnWindow),
+                                               minNumberOfRecHitsPerTrack = cms.uint32(runConfig.minRecHitsPerTrack),
                                                SuperChamberType = cms.vstring(SuperChType),
                                                SuperChamberSeedingLayers = cms.vdouble(SuperChSeedingLayers),
-                                               isMC = cms.bool(False),
-                                               shiftX = cms.vdouble(shiftX),
-                                               rotationZ = cms.vdouble(rotationZ),
-                                               trueDx = cms.vdouble(trueDx),
-                                               trueRz = cms.vdouble(trueRz),
                                                MuonSmootherParameters = cms.PSet(PropagatorAlong = cms.string('SteppingHelixPropagatorAny'),
                                                                                  PropagatorOpposite = cms.string('SteppingHelixPropagatorAny'),
                                                                                  RescalingFactor = cms.double(5.0)
@@ -267,10 +246,6 @@ process.AlignmentQC8 = cms.EDProducer('AlignmentQC8',
                                       minClusterSize = cms.double(runConfig.minClusterSize),
                                       maxResidual = cms.double(runConfig.maxResidual),
                                       isMC = cms.bool(False),
-                                      shiftX = cms.vdouble(shiftX),
-                                      rotationZ = cms.vdouble(rotationZ),
-                                      trueDx = cms.vdouble(trueDx),
-                                      trueRz = cms.vdouble(trueRz),
                                       SuperChamberType = cms.vstring(SuperChType),
                                       SuperChamberSeedingLayers = cms.vdouble(SuperChSeedingLayers),
                                       MuonSmootherParameters = cms.PSet(PropagatorAlong = cms.string('SteppingHelixPropagatorAny'),

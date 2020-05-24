@@ -145,7 +145,7 @@ void macro_tilt_twist(int run, string runPath, string AlignTablePath){
       for (int i_eta=0; i_eta<i_Eta; i_eta++)
         {
 	  sprintf(cnvname,"cnv_ColEtaPxPz_%d_%d",(i_col)+1,(i_eta)+1);
-          sprintf(histoname,"hColEtaPxPz_%d_%d",i_col+1,i_eta+1);
+          sprintf(histoname,"h_PxPz_col_eta_%d_%d",i_col+1,i_eta+1);
 	  hColEtaPxPZ[i_col][i_eta]=(TH1D*)infile->Get(direc+histoname);
 	  AngDistrEtaY[i_eta]=hColEtaPxPZ[i_col][i_eta]->GetMean();
 	  AngDistrEtaYError[i_eta]=hColEtaPxPZ[i_col][i_eta]->GetMeanError();

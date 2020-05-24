@@ -1,14 +1,23 @@
-#include <TH1F.h>
+#include <TH1D.h>
+#include <TH2D.h>
+#include <TH3D.h>
+#include <TEfficiency.h>
 #include <TFile.h>
+#include <TDirectory.h>
 #include <TTree.h>
 #include "TGraphErrors.h"
+#include "TGraphAsymmErrors.h"
 #include <TBranch.h>
 #include <TCanvas.h>
 #include <TSpectrum.h>
 #include <TF1.h>
+#include "TLine.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <TLatex.h>
+#include <vector>
+#include <string>
 #include <iostream>
 #include <fstream>
 
@@ -92,7 +101,7 @@ void macro_alignment(int run, string runPath, string AlignTablePath, int step){
     }
 
   // Getting the number of events
-  TH1D *hevt = (TH1D*)infile->Get(direc+"hev");
+  TH1D *hevt = (TH1D*)infile->Get(direc+"goodVStriggeredEvts");
   int evt_tot_number = hevt->GetBinContent(1);
 
   cout << "Number of events = " << evt_tot_number << endl;
@@ -183,7 +192,7 @@ void macro_alignment(int run, string runPath, string AlignTablePath, int step){
       for(int i_eta=0; i_eta<i_Eta; i_eta++)
     	{
 	  cnvResX[i_SC]->cd(i_eta+1);
-	  sprintf(histoname,"hchEtaResidualX_%d_%d", i_SC+1, i_eta+1);
+	  sprintf(histoname,"h_resX_eta_%d_%d", i_SC+1, i_eta+1);
 	  resXperSC[i_SC][i_eta]=(TH1D*)infile->Get(direc+histoname);
 	  resXperSC[i_SC][i_eta]->Draw();
 	  TF1 *GaussFit = new TF1("GaussFit","gaus",-3,3);
