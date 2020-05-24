@@ -13,8 +13,6 @@ AlignmentQC8::AlignmentQC8(const edm::ParameterSet& cfg): GEMBaseValidation(cfg)
   InputTagToken_TR = consumes<vector<reco::Track>>(cfg.getParameter<edm::InputTag>("tracksInputLabel"));
   InputTagToken_TS = consumes<vector<TrajectorySeed>>(cfg.getParameter<edm::InputTag>("seedInputLabel"));
   InputTagToken_TJ = consumes<vector<Trajectory>>(cfg.getParameter<edm::InputTag>("trajInputLabel"));
-  InputTagToken_TI = consumes<vector<int>>(cfg.getParameter<edm::InputTag>("chNoInputLabel"));
-  InputTagToken_TT = consumes<vector<unsigned int>>(cfg.getParameter<edm::InputTag>("seedTypeInputLabel"));
   InputTagToken_DG = consumes<GEMDigiCollection>(cfg.getParameter<edm::InputTag>("gemDigiLabel"));
   edm::ParameterSet serviceParameters = cfg.getParameter<edm::ParameterSet>("ServiceParameters");
   theService = new MuonServiceProxy(serviceParameters);
@@ -159,9 +157,6 @@ void AlignmentQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     return ;
   }
 
-  edm::Handle<std::vector<int>> idxChTraj;
-  e.getByToken( this->InputTagToken_TI, idxChTraj);
-
   edm::Handle<std::vector<TrajectorySeed>> seedGCM;
   e.getByToken( this->InputTagToken_TS, seedGCM);
 
@@ -170,9 +165,6 @@ void AlignmentQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
   edm::Handle<vector<reco::Track>> trackCollection;
   e.getByToken( this->InputTagToken_TR, trackCollection);
-
-  edm::Handle<std::vector<unsigned int>> seedTypes;
-  e.getByToken( this->InputTagToken_TT, seedTypes);
 
   if(trackCollection->size() == 0) return;
 
@@ -299,8 +291,8 @@ void AlignmentQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
       if (fabs(trajPy)<0.03)
       {
-        h_resX_eta[int(index/2)][confHitiEta]->Fill(confHitGP.x()-gtrp.x());
-        h_PxPz_col_eta[int(index/10)][confHitiEta]->Fill(trajPx/trajPz);
+        h_resX_eta[int(index/2)][confHitiEta-1]->Fill(confHitGP.x()-gtrp.x());
+        h_PxPz_col_eta[int(index/10)][confHitiEta-1]->Fill(trajPx/trajPz);
       }
     }
   }

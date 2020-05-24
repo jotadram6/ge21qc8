@@ -85,7 +85,6 @@ AlignmentTrackRecoQC8::AlignmentTrackRecoQC8(const edm::ParameterSet& ps) : iev(
   produces<reco::TrackExtraCollection>();
   produces<vector<Trajectory> >();
   produces<vector<TrajectorySeed> >();
-  produces<vector<int> >();
   printf("End of AlignmentTrackRecoQC8::AlignmentTrackRecoQC8() at %s\n", asctime(localtime(&rawTime)));
 }
 
@@ -99,7 +98,6 @@ void AlignmentTrackRecoQC8::produce(edm::Event& ev, const edm::EventSetup& setup
   unique_ptr<reco::TrackExtraCollection >     trackExtraCollection( new reco::TrackExtraCollection() );
   unique_ptr<vector<Trajectory> >             trajectorys( new vector<Trajectory>() );
   unique_ptr<vector<TrajectorySeed> >         trajectorySeeds( new vector<TrajectorySeed>() );
-  unique_ptr<vector<double> >                 trajectorySeedsHits( new vector<double>() );
   TrackingRecHitRef::key_type recHitsIndex = 0;
   TrackingRecHitRefProd recHitCollectionRefProd = ev.getRefBeforePut<TrackingRecHitCollection>();
   reco::TrackExtraRef::key_type trackExtraIndex = 0;
