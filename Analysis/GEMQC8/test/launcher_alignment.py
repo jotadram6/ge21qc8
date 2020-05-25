@@ -116,17 +116,6 @@ if __name__ == '__main__':
     resDir.communicate()
     time.sleep(1)
 
-    # Create folders for ouput plots per chamber
-    import configureRun_cfi as runConfig
-    SuperChType = runConfig.StandConfiguration
-    ChID = runConfig.ChamberIDs
-    for i in range(30):
-        if (SuperChType[int(i/2)] != '0'):
-            plotsDirCommand = "mkdir outPlots_Chamber_Pos_" + str(i) + "_" + ChID[i]
-            plotsDirChamber = subprocess.Popen(plotsDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=outDirPath)
-            plotsDirChamber.communicate()
-    time.sleep(1)
-
     # Selecting the correct output file, changing the name and moving to the output folder
     out_name = 'out_run_'
     for i in range(6-len(str(args.run_number))):
@@ -139,9 +128,8 @@ if __name__ == '__main__':
     time.sleep(1)
 
     # Alignment computation & output
-    alignCommand = "root -l -q " + runPath + "macro_alignment.c(" + str(args.run_number) + ",\"" + dataPath + "\"," + str(step) + ")"
-    alignment = subprocess.Popen(alignCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=alignoutDir)
-    print line
+    alignCommand = "root -l -q -b " + runPath + "macro_alignment.c(" + str(args.run_number) + ",\"" + dataPath + "\"," + str(step) + ")"
+    alignment = subprocess.Popen(alignCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=outDirPath)
     while alignment.poll() is None:
       line = alignment.stdout.readline()
       print(line)

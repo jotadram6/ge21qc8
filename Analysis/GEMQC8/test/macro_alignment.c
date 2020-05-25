@@ -64,7 +64,7 @@ void macro_alignment(int run, string dataPath, int step)
 
       pos = line.find(comma);
 			split = line.substr(0, pos);
-      ChPos = int(stoi(split[3]+split[4])/2.0);
+      ChPos = int(stoi(string(1,split[3])+string(1,split[4]))/2.0);
       line.erase(0, pos + comma.length());
 
       pos = line.find(comma);
@@ -78,7 +78,7 @@ void macro_alignment(int run, string dataPath, int step)
     }
     standConfigFile.close();
   }
-  else else cout << "Error opening file: " << infilename << endl;
+  else cout << "Error opening file: " << infilename << endl;
 
   // Getting the number of events
   TH1D *hevt = (TH1D*)infile->Get("AlignmentQC8/goodVStriggeredEvts");
@@ -87,7 +87,7 @@ void macro_alignment(int run, string dataPath, int step)
 
   // Histogram declaration
   char *histname = new char[20];
-  char *histoname = new char[20];
+  char *histoname = new char[50];
   TH1D *resXperSC[15][8];
   for (int i_SC=0; i_SC<15; i_SC++)
   {
@@ -98,8 +98,8 @@ void macro_alignment(int run, string dataPath, int step)
     }
   }
 
-  double resEtaY[8];
-  double resEtaYError[8];
+  double resEtaY[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
+  double resEtaYError[8] = {0.0,0.0,0.0,0.0,0.0,0.0,0.0,0.0};
   char *cnvname = new char[20];
   TCanvas *cnvResX[15];
   TCanvas *cnvResCorrPlot[15];
@@ -132,7 +132,8 @@ void macro_alignment(int run, string dataPath, int step)
         {
           stringstream linestream(line);
           int i = 0;
-          while(getline(linestream,word, ',')){
+          while(getline(linestream,word, ','))
+					{
             if(i==1) dx_prev[i_SC] = stod(word);
             if(i==6) rz_prev[i_SC] = stod(word);
             i += 1;
@@ -140,6 +141,7 @@ void macro_alignment(int run, string dataPath, int step)
           i_SC += 1;
         }
       }
+			prevFile.close();
     }
     else cout << "Error opening file: " << prevoutfilename << endl;
   }
@@ -154,7 +156,7 @@ void macro_alignment(int run, string dataPath, int step)
   cout << "Starting the analysis of run " << run << endl;
   for(int i_SC=0; i_SC<15; i_SC++)
   {
-    if (chType[i_SC] == 9) continue;
+		if (chType[i_SC] == 9) continue;
 
     sprintf(cnvname,"cnv_SC_%u_%u",(i_SC%5)+1,(i_SC/5)+1);
     cnvResX[i_SC] = new TCanvas(cnvname,cnvname,0,0,1000,600);
@@ -162,8 +164,8 @@ void macro_alignment(int run, string dataPath, int step)
     for(int i_eta=0; i_eta<8; i_eta++)
     {
       cnvResX[i_SC]->cd(i_eta+1);
-      sprintf(histoname,"h_resX_eta_%d_%d", i_SC+1, i_eta+1);
-      resXperSC[i_SC][i_eta]=(TH1D*)infile->Get("AlignmentQC8/"+histoname);
+      sprintf(histoname,"AlignmentQC8/h_resX_eta_%d_%d", i_SC+1, i_eta+1);
+      resXperSC[i_SC][i_eta]=(TH1D*)infile->Get(histoname);
       resXperSC[i_SC][i_eta]->Draw();
       TF1 *GaussFit = new TF1("GaussFit","gaus",-3,3);
       resXperSC[i_SC][i_eta]->Fit(GaussFit,"Q");
