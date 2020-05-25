@@ -22,34 +22,6 @@ def geomMaker(run_number, AlignOption):
 	      0,0,0,0,0,\
 	      0,0,0,0,0]
 
-
-	if (AlignOption == "forAlignment"):
-		infileName = alignmentTablesPath + "StandAlignmentValues_run" + str(run_number) + ".csv"
-
-		if (os.path.exists(infileName)):
-			with open(infileName) as infile:
-				for line in infile:
-					line = line.split('\n')[0]
-					SCtype = line.split(',')[0]
-					if (SCtype=='RunNumber'):
-						if (int(line.split(',')[1])!=int(run_number)):
-							sys.exit('StandAlignmentValues file has something wrong: run rumber not matching...')
-
-		if (os.path.exists(infileName)):
-			with open(infileName) as infile:
-				for line in infile:
-					if ('\n' in line):
-						line = line.split('\n')[0]
-					if ('\r' in line):
-						line = line.split('\r')[0]
-					if (line.split(',')[0]!='RunNumber' and line.split(',')[0]!='Position'):
-						position = line.split(',')[0]
-						row = int(position.split('/')[0])
-						column = int(position.split('/')[1])
-						SCnumber = (5 * (column - 1)) + (row - 1)
-						dx[SCnumber] = float(line.split(',')[1])
-						rz[SCnumber] = float(line.split(',')[6])
-
 	if (AlignOption == "yesAlignment"):
 		infileName = alignmentTablesPath + "StandAlignmentValues_run" + str(run_number) + ".csv"
 
