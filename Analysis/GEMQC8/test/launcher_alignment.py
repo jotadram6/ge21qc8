@@ -20,14 +20,15 @@ if __name__ == '__main__':
   srcPath = os.path.abspath("launcher_alignment.py").split('QC8Test')[0]+'QC8Test/src/'
   pyhtonModulesPath = os.path.abspath("launcher_alignment.py").split('QC8Test')[0]+'QC8Test/src/Analysis/GEMQC8/python/'
   runPath = os.path.abspath("launcher_alignment.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/test/'
-  alignmentTablesPath = os.path.abspath("launcher_alignment.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/StandAligmentTables/'
-  outDirPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + "Results_QC8_alignment_run_"+str(args.run_number)
+  dataPath = os.path.abspath("launcher_alignment.py").split('QC8Test')[0] + 'QC8Test/src/Analysis/GEMQC8/data/'
+  outDirPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + "Results_QC8_alignment_run_" + str(args.run_number)
 
   sys.path.insert(0,pyhtonModulesPath)
 
   import dumpDBtables
   import config_creator
   import geometry_files_creator
+  import convertAlignmentTables
 
   # Retrieve start date and time of the run
 
@@ -74,6 +75,18 @@ if __name__ == '__main__':
   geometry_files_creator.geomMaker(args.run_number, "noAlignment")
   time.sleep(1)
 
+  # Creating folder outside the CMMSW release to put the output files and plots
+  #---# Remove old version if want to recreate
+  if (os.path.exists(outDirPath)):
+      rmDirCommand = "rm -rf "+outDirPath
+      rmDir = subprocess.Popen(rmDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True)
+      rmDir.communicate()
+  #---# Create the new empty folder
+  resDirCommand = "mkdir "+outDirPath
+  resDir = subprocess.Popen(resDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True)
+  resDir.communicate()
+  time.sleep(1)
+
   for step in range(4):
 
     # Compiling after the generation of the geometry files
@@ -96,13 +109,8 @@ if __name__ == '__main__':
     running.communicate()
     time.sleep(1)
 
-    # Creating folder outside the CMMSW release to put the output files and plots
-    #---# Remove old version if want to recreate
-    if (os.path.exists(outDirPath)):
-        rmDirCommand = "rm -rf "+outDirPath
-        rmDir = subprocess.Popen(rmDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True)
-        rmDir.communicate()
-    #---# Create the new empty folder
+    # Create the new empty folder for this step
+    outDirPath = os.path.abspath("launcher_validation.py").split('QC8Test')[0] + "Results_QC8_alignment_run_" + str(args.run_number) + "/AlignmentStep" + str(step)
     resDirCommand = "mkdir "+outDirPath
     resDir = subprocess.Popen(resDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True)
     resDir.communicate()
@@ -112,7 +120,7 @@ if __name__ == '__main__':
     import configureRun_cfi as runConfig
     SuperChType = runConfig.StandConfiguration
     ChID = runConfig.ChamberIDs
-    for i in range (0,30):
+    for i in range(30):
         if (SuperChType[int(i/2)] != '0'):
             plotsDirCommand = "mkdir outPlots_Chamber_Pos_" + str(i) + "_" + ChID[i]
             plotsDirChamber = subprocess.Popen(plotsDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=outDirPath)
@@ -131,7 +139,7 @@ if __name__ == '__main__':
     time.sleep(1)
 
     # Alignment computation & output
-    alignCommand = "root -l -q " + runPath + "macro_alignment.c(" + str(args.run_number) + ",\"" + runPath + "\",\"" + alignmentTablesPath + "\"," + str(step) + ")"
+    alignCommand = "root -l -q " + runPath + "macro_alignment.c(" + str(args.run_number) + ",\"" + dataPath + "\"," + str(step) + ")"
     alignment = subprocess.Popen(alignCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=alignoutDir)
     print line
     while alignment.poll() is None:
@@ -141,10 +149,16 @@ if __name__ == '__main__':
     alignment.communicate()
     time.sleep(1)
 
-    # Generate geometry files
-    geometry_files_creator.geomMaker(args.run_number, "forAlignment")
+    # Moving the output of the root analysis to the folder in GEMQC8/data/..
+    out_name = 'StandAlignmentValues_run' + str(args.run_number) + '_ToDB.csv'
+    mvToDirCommand = "cp " + outDirPath + "/" + out_name + " " + dataPath + "StandAligmentTables/" + out_name
+    movingToDir = subprocess.Popen(mvToDirCommand.split(),stdout=subprocess.PIPE,universal_newlines=True,cwd=runPath)
+    movingToDir.communicate()
     time.sleep(1)
 
-  # Converting tables ToDB-like into FromDB-like
-  import convertAlignmentTables
-  convertAlignmentTables.convertAlignment(args.run_number,"alignment")
+    # Converting tables ToDB-like into FromDB-like
+    convertAlignmentTables.convertAlignment(args.run_number,"alignment")
+
+    # Generate geometry files
+    geometry_files_creator.geomMaker(args.run_number, "yesAlignment")
+    time.sleep(1)
