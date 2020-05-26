@@ -186,7 +186,7 @@ void macro_alignment(int run, string dataPath, int step)
     resCorrPlotSC->Fit(LinFit,"Q");
     resCorrPlotSC->Write(histname);
     dx[i_SC] = -LinFit->GetParameter(0);
-    rz[i_SC] = -atan(LinFit->GetParameter(1))*180.0/3.1415926536; // rotation in deg!
+    rz[i_SC] = atan(LinFit->GetParameter(1))*180.0/3.1415926536; // rotation in deg!
     delete LinFit;
   }
 
