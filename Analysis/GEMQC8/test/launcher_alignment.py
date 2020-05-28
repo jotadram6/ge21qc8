@@ -14,6 +14,8 @@ if __name__ == '__main__':
   parser = argparse.ArgumentParser(description="QC8 data analysis step 5. Software alignment of the chambers in the stand. For any doubt: https://twiki.cern.ch/twiki/bin/view/CMS/GEMCosmicRayAnalysis")
   # Positional arguments
   parser.add_argument("run_number", type=int, help="Specify the run number")
+  # Optional arguments
+  parser.add_argument("--steps", type=int, default=5, help="You can set the preferred number of steps to be executed for the iterative alignment. If not specified, the default value is 5.")
   args = parser.parse_args()
 
   # Different paths definition
@@ -87,7 +89,7 @@ if __name__ == '__main__':
   resDir.communicate()
   time.sleep(1)
 
-  for step in range(4):
+  for step in range(args.steps):
 
     # Compiling after the generation of the geometry files
     scramCommand = "scram build -j 4"
