@@ -52,10 +52,10 @@ if __name__ == '__main__':
     # Define the parser
     import argparse
     from argparse import RawTextHelpFormatter
-    parser = argparse.ArgumentParser(description="This script creates \"Efficiency vs gain\" or \"Efficiency vs EDcurrent\" for the chambers in the specified runs.\n\nHow to use examples:\n\n python getQC8effCurves.py /fullPath/runList.txt gain\n\n python getQC8effCurves.py /fullPath/runList.txt EDcurrent", formatter_class=RawTextHelpFormatter)
+    parser = argparse.ArgumentParser(description="This script creates \"Efficiency vs gain\" or \"Efficiency vs EDcurrent\" or \"Efficiency vs Threshold\" for the chambers in the specified runs.\n\nHow to use examples:\n\n python getQC8effCurves.py /fullPath/runList.txt gain\n\n python getQC8effCurves.py /fullPath/runList.txt EDcurrent\n\n python getQC8effCurves.py /fullPath/runList.txt Threshold", formatter_class=RawTextHelpFormatter)
     # Positional arguments
     parser.add_argument("runListFile", type=str, help="Please provide the full path to the desired file with list of runs to be used")
-    parser.add_argument("xAxisVar", type=str, default="gain", choices=["gain","EDcurrent"], help="Please specif the variable to be used for the x axis. Choices: \"gain\" or \"EDcurrent\"")
+    parser.add_argument("xAxisVar", type=str, default="gain", choices=["gain","EDcurrent","Threshold"], help="Please specify the variable to be used for the x axis. Choices: \"gain\" or \"EDcurrent\" or \"Threshold\"")
     args = parser.parse_args()
     
     try:
@@ -69,7 +69,8 @@ if __name__ == '__main__':
     infile.close()
     
     SCList = []
-    
+    vfatList = map(str, range(0,24))
+ 
     for run in runList:
         RunLogsFolder =  "/data/bigdisk/GEM-Data-Taking/GE11_QC8/QC8_RunLogs/Run_{:06d}/".format(int(run))
         for logs in os.listdir(RunLogsFolder):
@@ -96,10 +97,12 @@ if __name__ == '__main__':
                 try:
                     chLog = open(chLogFile, 'rb')
                 except IOError:
-                    sys.exit("Could not read file: " + chLog)
+                    print("Could not read file: " + chLogFile)
+                    continue
+                    #sys.exit("Could not read file: " + chLogFile)
                 
                 quantity,value = np.genfromtxt(chLog, dtype='str', delimiter="\t", unpack=True)
-                
+            
                 row = int((str(value[np.where(quantity == "Position")]).split('/')[0])[-1])
                 column = int(str(value[np.where(quantity == "Position")]).split('/')[1])
                 
@@ -111,6 +114,11 @@ if __name__ == '__main__':
                     elif (args.xAxisVar == "EDcurrent" and layer == 1):
                         x1.append(float(value[np.where(quantity == "I0(uA)")]))
                         xerr1.append(0.0)
+                    elif (args.xAxisVar == "Threshold" and layer == 1):
+                        boolVfat = np.in1d(quantity, vfatList) #returns True if quantity == 0, 1, .. 23
+                        thrList = value[boolVfat].astype(np.float) #list of threshold values for the 24 VFATs
+                        x1.append(float(np.mean(thrList)))
+                        xerr1.append(0.0)
                         
                     if (args.xAxisVar == "gain" and layer == 2):
                         x2.append(float(value[np.where(quantity == "EffAvgGain")]))
@@ -118,13 +126,20 @@ if __name__ == '__main__':
                     elif (args.xAxisVar == "EDcurrent" and layer == 2):
                         x2.append(float(value[np.where(quantity == "I0(uA)")]))
                         xerr2.append(0.0)
+                    elif (args.xAxisVar == "Threshold" and layer == 2):
+                        boolVfat = np.in1d(quantity, vfatList) #returns True if quantity == 0, 1, .. 23
+                        thrList = value[boolVfat].astype(np.float) #list of threshold values for the 24 VFATs
+                        x2.append(float(np.mean(thrList)))
+                        xerr2.append(0.0)
                         
                     resultsFile = "/home/gemuser/AnalysisQC8/Results_QC8_validation_run_" + str(int(run)) + "_yesMasks/Average_Efficiency_Per_Chamber.csv"
                     
                     try:
                         results = open(resultsFile, 'rb')
                     except IOError:
-                        sys.exit("Could not read file: " + resultsFile)
+                        print("Could not read file: " + resultsFile)
+                        continue
+                        #sys.exit("Could not read file: " + resultsFile)
                     
                     PositionCMSSW,Position,Chamber,Efficiency,ErrorEfficiency = np.genfromtxt(results, dtype='str', delimiter=",", skip_header=1, unpack=True)
                     
@@ -162,11 +177,11 @@ if __name__ == '__main__':
                 chLog.close()
                 
                 
-        if (len(x1)==0 and len(x2)==0):
-        	continue
+        if (len(x1)==0 or len(x2)==0):
+            continue
         
-        print SC, getLayName(SC,1), x1, y1, yerr1
-        print SC, getLayName(SC,2), x2, y2, yerr2
+        print SC, runList, getLayName(SC,1), x1, y1, yerr1
+        print SC, runList, getLayName(SC,2), x2, y2, yerr2
                 
         graph1 = ROOT.TGraphErrors(int(len(x1)), x1, y1, xerr1, yerr1)
         graph2 = ROOT.TGraphErrors(int(len(x2)), x2, y2, xerr2, yerr2)
@@ -175,10 +190,13 @@ if __name__ == '__main__':
         if (args.xAxisVar == "gain"):
         	graph1.GetXaxis().SetRangeUser(6000, 23000)
         	graph1.GetXaxis().SetTitle("Avg. Effective Gain")
-        if (args.xAxisVar == "gain"):
+        if (args.xAxisVar == "EDcurrent"):
         	#graph1.GetXaxis().SetRangeUser(650, 720)
         	graph1.GetXaxis().SetRangeUser(580, 720)
         	graph1.GetXaxis().SetTitle("Equivalent Divider Current (uA)")
+        if (args.xAxisVar == "Threshold"):
+        	graph1.GetXaxis().SetRangeUser(1, 21)
+        	graph1.GetXaxis().SetTitle("Average Threshold (fC)")
         graph1.GetXaxis().SetTitleOffset(1.1)
         graph1.GetXaxis().SetLabelSize(0.03)
         #graph1.GetYaxis().SetRangeUser(0.5, 1.0)
@@ -210,7 +228,7 @@ if __name__ == '__main__':
         latex.SetTextFont(42)
         latex.DrawLatex(0.104,0.91,"#scale[0.5]{#bf{CMS} #it{Preliminary}}")
         
-        c.SaveAs(str(SC) + "_EffCurve.png")
+        c.SaveAs(str(SC) + "_Eff" + args.xAxisVar + "Curve.png")
             
             
             
