@@ -1,8 +1,7 @@
-RunNumber = 71
+RunNumber = 123
 
-# Input and output files name definition
-InputFileName = 'run000071_Dummy_Dummy_2018.dat'
-OutputFileName = 'out_run_000071.root'
+# Output files name definition
+OutputFileName = 'out_run_000123.root'
 
 # Parameters definition
 minClusterSize = 1
@@ -16,5 +15,5 @@ MulSigmaOnWindow = 5
 # Stand configuration definition
 StandConfiguration = [\
 '0','0','0','0','0',\
-'S','0','S','0','S',\
+'S','0','S','0','0',\
 '0','0','0','0','0']

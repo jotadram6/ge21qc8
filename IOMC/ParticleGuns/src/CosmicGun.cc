@@ -20,10 +20,10 @@ CosmicGun::CosmicGun(const ParameterSet& pset) : BaseFlatGunProducer(pset)
 {
    ParameterSet defpset;
    ParameterSet pgun_params = pset.getParameter<ParameterSet>("PGunParameters");
-  
+
    fMinPt = pgun_params.getParameter<double>("MinPt");
    fMaxPt = pgun_params.getParameter<double>("MaxPt");
-  
+
   produces<HepMCProduct>("unsmeared");
   produces<GenEventInfoProduct>();
 }
@@ -39,39 +39,39 @@ bool myIsMuonPassScint(double dVx, double dVy, double dVz, double dPx, double dP
   double ScintilXMax =  1000.0;
   double ScintilYMin = -605.6;
   double ScintilYMax =  950.0;
-  
+
   double ScintilLowerZ = -114.85;
   double ScintilUpperZ = 1540.15;
-  
-  double dTLower = ( ScintilLowerZ - dVz ) / dPz;  
+
+  double dTLower = ( ScintilLowerZ - dVz ) / dPz;
   double dXLower = dVx + dTLower * dPx;
   double dYLower = dVy + dTLower * dPy;
-  
+
   double dTUpper = ( ScintilUpperZ - dVz ) / dPz;
   double dXUpper = dVx + dTUpper * dPx;
   double dYUpper = dVy + dTUpper * dPy;
-  
+
   if (( ScintilXMin <= dXLower && dXLower <= ScintilXMax && ScintilYMin <= dYLower && dYLower <= ScintilYMax ) &&
       ( ScintilXMin <= dXUpper && dXUpper <= ScintilXMax && ScintilYMin <= dYUpper && dYUpper <= ScintilYMax ))
   {
     return true;
   }
-  
+
   else return false;
 }
 
-void CosmicGun::produce(Event &e, const EventSetup& es) 
+void CosmicGun::produce(Event &e, const EventSetup& es)
 {
    edm::Service<edm::RandomNumberGenerator> rng;
    CLHEP::HepRandomEngine* engine = &rng->getEngine(e.streamID());
 
    if ( fVerbosity > 0 )
    {
-      cout << " CosmicGun : Begin New Event Generation" << endl ; 
+      cout << " CosmicGun : Begin New Event Generation" << endl ;
    }
-   
+
    fEvt = new HepMC::GenEvent() ;
-   
+
    double dVx;
    double dVy;
    double dVz = 1540.15; // same Y as the upper scintillator
@@ -85,12 +85,12 @@ void CosmicGun::produce(Event &e, const EventSetup& es)
        double px, py, pz, mom;
        double phi, theta;
        int j = 0;
-       
+
        while (j < 10000) // j < 10000 to avoid too long computational time
        {
          dVx = CLHEP::RandFlat::shoot(engine, -1000.0, 1000.0) ;
          dVy = CLHEP::RandFlat::shoot(engine, -605.6, 950.0) ;
-         
+
          mom   = CLHEP::RandFlat::shoot(engine, fMinPt, fMaxPt) ;
          phi   = CLHEP::RandFlat::shoot(engine, fMinPhi, fMaxPhi) ;
          theta = 0;
@@ -99,7 +99,7 @@ void CosmicGun::produce(Event &e, const EventSetup& es)
          {
              theta  = CLHEP::RandFlat::shoot(engine, fMinTheta, fMaxTheta);
          }
-         
+
          if (!fIsThetaFlat)
          {
              double u = CLHEP::RandFlat::shoot(engine, 0.0, 0.785398); // u = Uniform[0;Pi/4]
@@ -107,7 +107,7 @@ void CosmicGun::produce(Event &e, const EventSetup& es)
              while(abs(u-(0.5*theta+0.25*sin(2*theta)))>0.000015)
              {
                  theta+=0.00001;
-             }             
+             }
          }
 
          px     =  mom*sin(theta)*cos(phi) ;
@@ -115,13 +115,13 @@ void CosmicGun::produce(Event &e, const EventSetup& es)
          pz     =  mom*cos(theta) ;
 
          if ( myIsMuonPassScint(dVx, dVy, dVz, px, py, pz) == true ) break; // muon passing through both the scintillators => valid: the loop can be stopped
-         
+
          j++;
-         
+
        }
-       
+
        int PartID = fPartIDs[ip] ;
-       const HepPDT::ParticleData* 
+       const HepPDT::ParticleData*
        PData = fPDGTable->particle(HepPDT::ParticleID(abs(PartID))) ;
        double mass   = PData->mass().value() ;
        Vtx = new HepMC::GenVertex(HepMC::FourVector(dVx,dVy,dVz));
@@ -141,7 +141,7 @@ void CosmicGun::produce(Event &e, const EventSetup& es)
 	      if ( PartID == 22 || PartID == 23 )
 	      {
 	        APartID = PartID ;
-	      }	  
+	      }
 	      HepMC::GenParticle* APart = new HepMC::GenParticle(ap,APartID,1);
 	      APart->suggest_barcode( barcode ) ;
 	      barcode++ ;
@@ -151,11 +151,11 @@ void CosmicGun::produce(Event &e, const EventSetup& es)
 
    fEvt->add_vertex(Vtx) ;
    fEvt->set_event_number(e.id().event()) ;
-   fEvt->set_signal_process_id(20) ; 
-        
+   fEvt->set_signal_process_id(20) ;
+
    if ( fVerbosity > 0 )
    {
-      fEvt->print() ;  
+      fEvt->print() ;
    }
 
    unique_ptr<HepMCProduct> BProduct(new HepMCProduct()) ;
@@ -164,7 +164,7 @@ void CosmicGun::produce(Event &e, const EventSetup& es)
 
    unique_ptr<GenEventInfoProduct> genEventInfo(new GenEventInfoProduct(fEvt));
    e.put(std::move(genEventInfo));
-    
+
    if ( fVerbosity > 0 )
    {
       cout << " CosmicGun : Event Generation Done " << endl;

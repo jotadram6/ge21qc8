@@ -1,4 +1,4 @@
-HV boards
+HV boards (CAEN A1515)
 Bit 0 OFF/ON
 Bit 1 RUP
 Bit 2 RDW
