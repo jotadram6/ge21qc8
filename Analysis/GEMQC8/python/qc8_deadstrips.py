@@ -1,37 +1,34 @@
 #!/usr/bin/env python
-from datetime import datetime,date,time
-from time import sleep
 from xml.etree.ElementTree import Element, SubElement, Comment, tostring
-import time
 import xlrd
-from xlrd import xldate
-import re
 import sys
-from xmlConversion import generateXMLHeader, generateDataSetMultipleParts, writeToFile,writeToFile1
-from xmlConversion import generateXMLDatafastamb,generateXMLDatafast,generateXMLDatalongamb,generateXMLDatalong, generateXMLData3,generateXMLData3a,generateXMLData4,generateXMLData4a,generateXMLData5a,generateXMLData5,generateXMLData4s, generateXMLData5s, generateXMLDataStrips, generateXMLDataAlignment, generateXMLDataQC8DeadStrips
+from xmlConversion import generateXMLHeader, generateDataSetMultipleParts, writeToFile, readFile
+from xmlConversion import generateXMLDataQC8DeadStrips
 
-def xml_from_excel5(excel_file):
-    wb = xlrd.open_workbook(excel_file)
-    sh = wb.sheet_by_index(0)
-    user = ''
-    location=''
-    Start=''
-    Stop=''
-    comment=''
-    Run = sh.cell(0,1).value
-    root = generateXMLHeader("QC8_GEM_MASKED_STRIPS_DEAD","GEM QC8 MASKED STRIPS DEAD", "GEM DEAD STRIPS QC8",str(Run),str(Start),str(Stop),str(comment),str(location),str(user))
-    dataSet = generateDataSetMultipleParts(root,comment,"1")
-    for row in range(2,sh.nrows):
-        ch_serial_number= sh.row_values(row)[0]
-        gem_number= sh.row_values(row)[1]
-        position= sh.row_values(row)[2]
-        vfat= sh.row_values(row)[3]
-        channel= sh.row_values(row)[4]
-        strip= sh.row_values(row)[5]
-        generateXMLDataQC8DeadStrips(dataSet,str(ch_serial_number),str(gem_number),str(position), str(vfat), str(channel),str(strip))
-        print(str(row-1)+" / "+str(sh.nrows-2))
-    writeToFile(fileName,tostring(root))
-if __name__ =="__main__":
+def xml_from_csv(csv_file):
+  lines = readFile(csv_file)
+  for i in range(len(lines)):
+    lines[i] = lines[i].split('\n')[0]
+  Run = int(lines[0].split(',')[1])
+  Start = '2020-03-14 12:00:00'
+  Stop = '2020-03-14 12:00:00'
+  comment = ''
+  location = ''
+  user = ''
+  root = generateXMLHeader("QC8_GEM_MASKED_STRIPS_DEAD","GEM QC8 MASKED STRIPS DEAD", "GEM DEAD STRIPS QC8",str(Run),str(Start),str(Stop),str(comment),str(location),str(user))
+  dataSet = generateDataSetMultipleParts(root,comment,"1")
+  for line in range(2,len(lines)):
+    ch_serial_number = str(lines[line].split(',')[0])
+    gem_number = str(lines[line].split(',')[1])
+    position = str(lines[line].split(',')[2])
+    vfat = int(lines[line].split(',')[3])
+    channel = int(lines[line].split(',')[4])
+    strip = int(lines[line].split(',')[5])
+    generateXMLDataQC8DeadStrips(dataSet,str(ch_serial_number),str(gem_number),str(position), str(vfat), str(channel),str(strip))
+    print(str(line-1)+" / "+str(len(lines)-2))
+  fileName = csv_file[:-4] + ".xml"
+  writeToFile(fileName,tostring(root))
+
+if __name__ == "__main__":
 	fname = sys.argv[1]
-	fileName=fname[:-5]+".xml"
-	xml_from_excel5(fname)
+	xml_from_csv(fname)
