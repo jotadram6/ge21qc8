@@ -359,13 +359,6 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
 
   if (idxChTraj->size() == 0) return;
 
-  // Get the propagators
-
-  edm::ESHandle<Propagator> propagatorAlong;
-  edm::ESHandle<Propagator> propagatorOpposite;
-  iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",propagatorAlong);
-  iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",propagatorOpposite);
-
   // Efficiency calculation per chamber from here on!
 
   int countTC = 0;
@@ -465,8 +458,7 @@ void ValidationQC8::analyze(const edm::Event& e, const edm::EventSetup& iSetup){
     for (int ieta=0; ieta<n_eta and mRoll==-1; ieta++)
     {
       const BoundPlane& bpeta = GEMGeometry_->idToDet(ch.etaPartition(ieta+1)->id())->surface();
-      tsosTestProp = propagatorAlong->propagate(startPoint, bpeta);
-      if (!tsosTestProp.isValid()) tsosTestProp = propagatorOpposite->propagate(startPoint, bpeta);
+      tsosTestProp = theService->propagator("SteppingHelixPropagatorAny")->propagate(startPoint, bpeta);
       if (!tsosTestProp.isValid()) continue;
       if (bpeta.bounds().inside(tsosTestProp.localPosition()))
       {
