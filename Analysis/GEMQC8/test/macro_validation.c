@@ -317,7 +317,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		for (unsigned int eta=0; eta<8; eta++)
 		{
 			sprintf(name,"clusterSize_ch_%u_eta_%u",ch,(eta+1));
-			clusterSize1D[ch][eta] = new TH1D(name,"",20,0,20);
+			clusterSize1D[ch][eta] = new TH1D(name,"",20,-0.5,19.5);
 
 			for (int phi=0; phi<3; phi++)
 			{
@@ -345,7 +345,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		for (unsigned int eta=0; eta<8; eta++)
 		{
 			sprintf(name,"assocHitsClusterSize_ch_%u_eta_%u",ch,(eta+1));
-			assocHitsClusterSize1D[ch][eta] = new TH1D(name,"",20,0,20);
+			assocHitsClusterSize1D[ch][eta] = new TH1D(name,"",20,-0.5,19.5);
 
 			for (int phi=0; phi<3; phi++)
 			{
@@ -361,7 +361,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		for (unsigned int vfat=0; vfat<24; vfat++)
 		{
 			sprintf(name,"assocHitsClusterSize_ch_%u_vfat_%u",ch,vfat);
-			assocHitsClusterSizePerVFAT[ch][vfat] = new TH1D(name,"",20,0,20);
+			assocHitsClusterSizePerVFAT[ch][vfat] = new TH1D(name,"",20,-0.5,19.5);
 			for (int cls=0; cls<20; cls++)
 			{
 				assocHitsClusterSizePerVFAT[ch][vfat]->SetBinContent((cls+1),assocHitsClusterSize3D->GetBinContent(ch+1,vfat+1,cls+1));
@@ -382,7 +382,7 @@ void macro_validation(int run, string dataDir, string startDateTimeRun)
 		for (unsigned int eta=0; eta<8; eta++)
 		{
 			sprintf(name,"nonAssocHitsClusterSize_ch_%u_eta_%u",ch,(eta+1));
-			nonAssocHitsClusterSize1D[ch][eta] = new TH1D(name,"",20,0,20);
+			nonAssocHitsClusterSize1D[ch][eta] = new TH1D(name,"",20,-0.5,19.5);
 
 			for (int phi=0; phi<3; phi++)
 			{
