@@ -10,6 +10,9 @@
 #include <memory>
 
 // user include files
+//New lines
+#include "FWCore/Framework/interface/ConsumesCollector.h"
+//
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -39,7 +42,11 @@ CosmicMuonLinksProducer::CosmicMuonLinksProducer(const ParameterSet& iConfig)
 
   ParameterSet serviceParameters = iConfig.getParameter<ParameterSet>("ServiceParameters");
 
-  theService = new MuonServiceProxy(serviceParameters);
+  //New code
+  theService = new MuonServiceProxy(serviceParameters, consumesCollector());
+  ConsumesCollector iC = consumesCollector();
+  //Old code
+  //theService = new MuonServiceProxy(serviceParameters);
 
   std::vector<edm::ParameterSet> theMapPSets = iConfig.getParameter<std::vector<edm::ParameterSet> >("Maps");
   for (std::vector<edm::ParameterSet>::const_iterator iMPS = theMapPSets.begin();
